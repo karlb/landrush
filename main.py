@@ -31,6 +31,8 @@ class Player():
 
     def __init__(self, name):
         self.name = name
+        self.money = 1000
+        self.bids = [None, None]
         self.id = randint(1, 10000000)
 
 
@@ -46,16 +48,29 @@ class MainPage(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
+def get_game(game_id, player_id):
+    state = ndb.Key(GameState, int(game_id)).get()
+    assert state
+    try:
+        player = [p for p in state.players if p.id == int(player_id)][0]
+    except IndexError:
+        player = None
+    return state, player
+
+
 class ShowGame(MainPage):
 
     def get(self, game_id, player_id=None):
-        state = ndb.Key(GameState, int(game_id)).get()
-        assert state
-        try:
-            player = [p for p in state.players if p.id == int(player_id)][0]
-        except IndexError:
-            player = None
+        state, player = get_game(game_id, player_id)
         self.show_game(state, player)
+
+    def post(self, game_id, player_id):
+        """ Place bids """
+        state, player = get_game(game_id, player_id)
+        player.bids = [float(b) for b in self.request.POST.getall('bid')]
+        print player.bids
+        state.put()
+        self.redirect("/game/%d/%s" % (state.key.id(), player.id))
 
 
 class NewPlayer(webapp2.RequestHandler):

@@ -43,15 +43,15 @@
           {% endfor %}
       <table>
 
-	  <div class="auction">
+	  <form class="auction" method="POST">
 		  <h3>Next Auction:</h3>
 		  {% for land in auction %}
-			-{{ land.fields }}
-			<input>
+		    {{ loop.index }}: {{ land.fields }}
+			<input name="bid" value="{{ player.bids[loop.index0] }}">
 			<br>
 		  {% endfor %}
 		  <button>Place Bids</button>
-	  </div>
+	  </form>
 
 	  {% if player %}
 		<div class="player_info">
