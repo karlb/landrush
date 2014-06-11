@@ -39,7 +39,7 @@ class Player():
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
-        self.show_game(GameState.new_game())
+        self.show_game(GameState.new_game(), None)
 
     def show_game(self, state, player):
         template_values = dict(board=state.board, auction=state.next_auction,

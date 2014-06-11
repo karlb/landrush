@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 from random import randint, choice
 from itertools import chain, product
@@ -20,7 +19,7 @@ class Field():
         self.neighbors = []
 
     def __repr__(self):
-        return repr(self.index)
+        return repr(sorted(self.index))
 
     def classes(self):
         ret_vals = []
@@ -41,7 +40,8 @@ class Field():
 class Land():
 
     def __init__(self, fields):
-        self.color = '#{:06x}'.format(randint(0, 255 ** 3))
+        #self.color = '#{:06x}'.format(randint(0, 255 ** 3))
+        self.color = '#' + '{:02x}'.format(int(0x11 * randint(80, 160) * 0.1)) * 3
         self.fields = []
         self.neighbors = []
         self.neighbor_fields = []

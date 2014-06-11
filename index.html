@@ -47,7 +47,9 @@
 		  <h3>Next Auction:</h3>
 		  {% for land in auction %}
 		    {{ loop.index }}: {{ land.fields }}
+			{% if player %}
 			<input name="bid" value="{{ player.bids[loop.index0] }}">
+			{% endif %}
 			<br>
 		  {% endfor %}
 		  <button>Place Bids</button>
