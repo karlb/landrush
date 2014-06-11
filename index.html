@@ -2,6 +2,7 @@
 {% autoescape true %}
 <html>
     <head>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <style>
             .board {
 				margin: 0 2%;
@@ -29,7 +30,19 @@
 			.auction, .player_info {
 				margin: 2%;
 			}
+
+			td.highlight {
+				background-color: red !important;
+			}
         </style>
+		<script>
+			$(function() {
+				$('.auction-land').hover(
+					function () {$('.' + this.dataset.land).addClass('highlight')},
+					function () {$('.' + this.dataset.land).removeClass('highlight')}
+				);
+			});
+		</script>
     </head>
   <body>
       <table class="board">
@@ -46,11 +59,12 @@
 	  <form class="auction" method="POST">
 		  <h3>Next Auction:</h3>
 		  {% for land in auction %}
+			<div class="auction-land" data-land="{{ land.id }}">
 		    {{ loop.index }}: {{ land.fields }}
 			{% if player %}
 			<input name="bid" value="{{ player.bids[loop.index0] }}">
 			{% endif %}
-			<br>
+			</div>
 		  {% endfor %}
 		  <button>Place Bids</button>
 	  </form>

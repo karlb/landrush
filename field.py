@@ -19,21 +19,29 @@ class Field():
         self.neighbors = []
 
     def __repr__(self):
-        return repr(sorted(self.index))
+        return repr(self.index)
 
     def classes(self):
         ret_vals = []
+
+        # borders
         for name, off in offsets.items():
             other_index = (
                 self.index[0] + off[0],
                 self.index[1] + off[1]
             )
+            # border at edge of board
             if other_index not in self.board.all_indexes:
                 ret_vals.append(name + '_border')
                 continue
+            # border between lands
             other_field = self.board.fields[other_index]
             if other_field.land != self.land:
                 ret_vals.append(name + '_border')
+
+        # land class
+        ret_vals.append(self.land.id)
+
         return ' '.join(ret_vals)
 
 
@@ -47,6 +55,7 @@ class Land():
         self.neighbor_fields = []
         for f in fields:
             self.add_field(f)
+        self.id = 'land-%d-%d' % sorted(self.fields)[0].index
 
     def add_field(self, field):
         self.fields.append(field)
