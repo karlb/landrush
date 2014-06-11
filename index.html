@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+    <head>
+        <style>
+            .board {
+				margin: 0 2%;
+				float: left;
+                width: 500px;
+                height: 500px;
+				border-collapse: collapse;
+            }
+            .board td {
+                border: 0 solid black;
+            }
+            .board .top_border {
+                border-top-width: 3px;
+            }
+            .board .bottom_border {
+                border-bottom-width: 3px;
+            }
+            .board .left_border {
+                border-left-width: 3px;
+            }
+            .board .right_border {
+                border-right-width: 3px;
+            }
+
+			.auction, .player_info {
+				margin: 2%;
+			}
+        </style>
+    </head>
+  <body>
+      <table class="board">
+          {% for row in board.rows %}
+              <tr>
+                  {% for field in row %}
+                  <td style="background-color: {{ field.land.color }}"
+					  class="{{ field.classes() }}">{{ field.index }}</td>
+                  {% endfor %}
+              </tr>
+          {% endfor %}
+      <table>
+
+	  <div class="auction">
+		  <h3>Next Auction:</h3>
+		  {% for land in auction %}
+			-{{ land.fields }}
+			<input>
+			<br>
+		  {% endfor %}
+		  <button>Place Bids</button>
+	  </div>
+
+	  {% if player %}
+		<div class="player_info">
+			<h3>{{player.name}}</h3>
+			Money: 1000
+		</div>
+	  {% else %}
+		<div class="player_info">
+			<h3>Join Game:</h3>
+			<form action="new_player" method="POST">
+				Player Name: <input name="name">
+				<br>
+				<button>Join</button>
+			</form>
+		</div>
+	  {% endif %}
+
+	  <div class="player_info">
+		  <h3>Players:</h3>
+		  <ol>
+			{% for p in players %}
+			<li>{{ p.name }}</li>
+			{% endfor %}
+		  </ol>
+	  </div>
+
+  </body>
+</html>
+{% endautoescape %}
