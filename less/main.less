@@ -1,0 +1,55 @@
+.board {
+  margin: 0 2%;
+  float: left;
+  width: 500px;
+  height: 500px;
+  border-collapse: collapse;
+}
+.board td {
+  border: 0 solid black;
+}
+.board .top_border {
+  border-top-width: 3px;
+}
+.board .bottom_border {
+  border-bottom-width: 3px;
+}
+.board .left_border {
+  border-left-width: 3px;
+}
+.board .right_border {
+  border-right-width: 3px;
+}
+.auction,
+.player_info {
+  margin: 2%;
+}
+td.highlight {
+  background-color: red !important;
+}
+
+.active_player {
+	background-color: lightgray; 
+}
+
+
+// color palette from http://www.mulinblog.com/a-color-palette-optimized-for-data-visualization/
+@color-p1: #F15854;
+@color-p2: #5DA5DA;
+@color-p3: #FAA43A;
+@color-p4: #60BD68;
+@color-p5: #F17CB0;
+@color-p6: #B2912F;
+@color-p7: #B276B2;
+@color-p8: #DECF3F;
+@color-p9: #4D4D4D;
+
+.background-p1 { background-color: @color-p1; }
+.background-p2 { background-color: @color-p2; }
+.background-p3 { background-color: @color-p3; }
+.background-p4 { background-color: @color-p4; }
+.background-p5 { background-color: @color-p5; }
+.background-p6 { background-color: @color-p6; }
+.background-p7 { background-color: @color-p7; }
+.background-p8 { background-color: @color-p8; }
+.background-p9 { background-color: @color-p9; }

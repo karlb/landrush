@@ -42,6 +42,11 @@ class Field():
         # land class
         ret_vals.append(self.land.id)
 
+        # background color
+        #print self.land.owner
+        if self.land.owner:
+            ret_vals.append('background-p%d' % self.land.owner.player_number)
+
         return ' '.join(ret_vals)
 
 
@@ -56,6 +61,7 @@ class Land():
         for f in fields:
             self.add_field(f)
         self.id = 'land-%d-%d' % sorted(self.fields)[0].index
+        self.owner = None
 
     def add_field(self, field):
         self.fields.append(field)

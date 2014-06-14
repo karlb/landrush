@@ -1,0 +1,59 @@
+.board {
+  margin: 0 2%;
+  float: left;
+  width: 500px;
+  height: 500px;
+  border-collapse: collapse;
+}
+.board td {
+  border: 0 solid black;
+}
+.board .top_border {
+  border-top-width: 3px;
+}
+.board .bottom_border {
+  border-bottom-width: 3px;
+}
+.board .left_border {
+  border-left-width: 3px;
+}
+.board .right_border {
+  border-right-width: 3px;
+}
+.auction,
+.player_info {
+  margin: 2%;
+}
+td.highlight {
+  background-color: red !important;
+}
+.active_player {
+  background-color: lightgray;
+}
+.background-p1 {
+  background-color: #f15854;
+}
+.background-p2 {
+  background-color: #5da5da;
+}
+.background-p3 {
+  background-color: #faa43a;
+}
+.background-p4 {
+  background-color: #60bd68;
+}
+.background-p5 {
+  background-color: #f17cb0;
+}
+.background-p6 {
+  background-color: #b2912f;
+}
+.background-p7 {
+  background-color: #b276b2;
+}
+.background-p8 {
+  background-color: #decf3f;
+}
+.background-p9 {
+  background-color: #4d4d4d;
+}

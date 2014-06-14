@@ -3,38 +3,7 @@
 <html>
     <head>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <style>
-            .board {
-				margin: 0 2%;
-				float: left;
-                width: 500px;
-                height: 500px;
-				border-collapse: collapse;
-            }
-            .board td {
-                border: 0 solid black;
-            }
-            .board .top_border {
-                border-top-width: 3px;
-            }
-            .board .bottom_border {
-                border-bottom-width: 3px;
-            }
-            .board .left_border {
-                border-left-width: 3px;
-            }
-            .board .right_border {
-                border-right-width: 3px;
-            }
-
-			.auction, .player_info {
-				margin: 2%;
-			}
-
-			td.highlight {
-				background-color: red !important;
-			}
-        </style>
+		<link rel="stylesheet" href="/css/main.css">
 		<script>
 			$(function() {
 				$('.auction-land').hover(
@@ -43,38 +12,54 @@
 				);
 			});
 		</script>
-    </head>
-  <body>
-      <table class="board">
-          {% for row in board.rows %}
-              <tr>
-                  {% for field in row %}
-                  <td style="background-color: {{ field.land.color }}"
-					  class="{{ field.classes() }}">{{ field.index }}</td>
-                  {% endfor %}
-              </tr>
-          {% endfor %}
-      <table>
+	</head>
+	<body>
+		<table class="board">
+			{% for row in board.rows %}
+			<tr>
+				{% for field in row %}
+				<!--td style="background-color: {{ field.land.color }}"-->
+				<td style=""
+					class="{{ field.classes() }}">{{ field.index }}</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</table>
 
-	  <form class="auction" method="POST">
-		  <h3>Next Auction:</h3>
-		  {% for land in auction %}
+		<form class="auction" method="POST">
+			<h3>Current Auction</h3>
+			{% for land in auction %}
 			<div class="auction-land" data-land="{{ land.id }}">
-		    {{ loop.index }}: {{ land.fields }}
-			{% if player %}
-			<input name="bid" value="{{ player.bids[loop.index0] }}">
-			{% endif %}
+				{{ loop.index }}: {{ land | land }}
+				{% if player %}
+					<input name="bid" value="{{ player.bids[loop.index0] or 0 }}">
+				{% endif %}
 			</div>
-		  {% endfor %}
-		  <button>Place Bids</button>
-	  </form>
+			{% endfor %}
+			{% if player %}
+				<button>Place Bids</button>
+			{% endif %}
+		</form>
 
-	  {% if player %}
-		<div class="player_info">
-			<h3>{{player.name}}</h3>
-			Money: 1000
+		<div class="auction" method="POST">
+			<h3>Upcoming Auction</h3>
+			{% for land in upcoming_auction %}
+			<div class="auction-land" data-land="{{ land.id }}">
+				{{ loop.index }}: {{ land.fields }}
+			</div>
+			{% endfor %}
 		</div>
-	  {% else %}
+
+		<div class="player_info">
+			<h3>Auction Results</h3>
+			{% for a in last_auction %}
+			<div class="auction-land" data-land="{{ a.land.id }}">
+				{{ a.player | player }} bought {{ a.land | land }} for {{ a.price }}
+			</div>
+			{% endfor %}
+		</div>
+
+		{% if not player %}
 		<div class="player_info">
 			<h3>Join Game:</h3>
 			<form action="new_player" method="POST">
@@ -83,17 +68,30 @@
 				<button>Join</button>
 			</form>
 		</div>
-	  {% endif %}
+		{% endif %}
 
-	  <div class="player_info">
-		  <h3>Players:</h3>
-		  <ol>
-			{% for p in players %}
-			<li>{{ p.name }}</li>
-			{% endfor %}
-		  </ol>
-	  </div>
+		<div class="player_info">
+			<h3>Overview</h3>
+			<table>
+				<tr>
+					<th></th>
+					<th>Player</th>
+					<th>Power</th>
+					<th>Money</th>
+					<th>Last Payout</th>
+				</tr>
+				{% for p in players %}
+				<tr {% if p == player %}class="active_player"{% endif %}>
+					<td>{% if p.bids %}✓{% endif %}</td>
+					<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
+					<td>{{ p.connected_lands }}</td>
+					<td>{{ p.money | money }}</td>
+					<td>{{ p.payout }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
 
-  </body>
+	</body>
 </html>
 {% endautoescape %}
