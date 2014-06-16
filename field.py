@@ -41,9 +41,9 @@ class Field():
 
         # land class
         ret_vals.append(self.land.id)
+        ret_vals.append('free-land-%d' % self.land.color)
 
         # background color
-        #print self.land.owner
         if self.land.owner:
             ret_vals.append('background-p%d' % self.land.owner.player_number)
 
@@ -53,8 +53,7 @@ class Field():
 class Land():
 
     def __init__(self, fields):
-        #self.color = '#{:06x}'.format(randint(0, 255 ** 3))
-        self.color = '#' + '{:02x}'.format(int(0x11 * randint(80, 160) * 0.1)) * 3
+        self.color = randint(1, 5)
         self.fields = []
         self.neighbors = []
         self.neighbor_fields = []

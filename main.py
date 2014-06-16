@@ -16,15 +16,14 @@ JINJA_ENVIRONMENT.filters.update(jinja_filters)
 
 class Game(ndb.Model):
     state = ndb.PickleProperty()
-    players = ndb.PickleProperty()  # TODO: KeyProperty(repeated=True)
     auction_size = ndb.IntegerProperty()
     start_money = ndb.FloatProperty()
     new_money = ndb.FloatProperty()
     final_payout = ndb.FloatProperty()
 
     @classmethod
-    def new_game(cls, auction_size=2, start_money=1000, new_money=100, final_payout=500):
-        board = Board()
+    def new_game(cls, auction_size=3, start_money=1000, new_money=100, final_payout=500):
+        board = Board(size=(8, 8))
         auction = sample(board.lands, auction_size)
         upcoming_auction = sample(board.lands - set(auction), auction_size)
         return cls(
@@ -33,8 +32,8 @@ class Game(ndb.Model):
                 auction=auction,
                 upcoming_auction=upcoming_auction,
                 last_auction=[],
+                players=[],
             ),
-            players=[],
             auction_size=auction_size,
             start_money=start_money,
             new_money=new_money,
@@ -44,6 +43,10 @@ class Game(ndb.Model):
     @property
     def board(self):
         return self.state['board']
+
+    @property
+    def players(self):
+        return self.state['players']
 
     @property
     def auction(self):
@@ -57,11 +60,18 @@ class Game(ndb.Model):
         # resolve auction
         self.state['last_auction'] = []
         for i in range(len(self.auction)):
+            # reduce bids to available money
+            for p in self.players:
+                p.bids[i] = min(p.bids[i], p.money)
+
+            # detect winner
             bidding_players = sorted((p for p in self.players if p.bids[i]),
                                      key=lambda p: -p.bids[i])
             if not bidding_players:
                 continue
             winner = bidding_players[0]
+
+            # transfer land to winner
             land = self.auction[i]
             price = winner.bids[i]
             winner.money -= price
@@ -85,7 +95,7 @@ class Game(ndb.Model):
         self.distribute_money()
 
     def distribute_money(self):
-        self.players.sort(key=lambda p: (-p.connected_lands, -p.money))
+        self.players.sort(key=lambda p: (-p.connected_lands, p.money))
         payouts = list(reversed(range(len(self.players))))
         total_payout = (
             self.new_money if self.upcoming_auction
@@ -112,7 +122,7 @@ class Player():
 
     def __init__(self, name, game):
         self.name = name
-        self.money = game.state['start_money']
+        self.money = game.start_money
         self.bids = None
         self.id = randint(1, 10000000)
         self.player_number = len(game.players) + 1
