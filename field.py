@@ -52,9 +52,10 @@ class Field():
 
 class Land():
 
-    def __init__(self, fields):
+    def __init__(self, board, fields):
         self.color = randint(1, 5)
         self.fields = []
+        self.board = board
         self.neighbors = []
         self.neighbor_fields = []
         for f in fields:
@@ -68,6 +69,11 @@ class Land():
             field.land.fields.remove(field)
         field.land = self
 
+    def add_land(self, land):
+        for field in list(land.fields):
+            self.add_field(field)
+        self.board.lands.remove(land)
+
 
 class Board():
 
@@ -79,14 +85,14 @@ class Board():
             for x in range(size[1])])
 
         for field in self:
-            Land([field])
+            Land(self, [field])
 
         self.calc_neighbors()
 
-        for i in range(60):
+        for i in range(22):
             land = choice(list(self.lands))
-            joined_field = choice(list(land.neighbor_fields))
-            land.add_field(joined_field)
+            joined_land = choice(list(land.neighbors))
+            land.add_land(joined_land)
             self.calc_neighbors()
 
     def __iter__(self):
