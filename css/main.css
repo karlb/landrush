@@ -4,9 +4,11 @@
   width: 500px;
   height: 500px;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 .board td {
   border: 0 solid black;
+  text-align: center;
 }
 .board .top_border {
   border-top-width: 3px;

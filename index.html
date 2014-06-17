@@ -19,7 +19,14 @@
 			<tr>
 				{% for field in row %}
 				<!--td style="background-color: {{ field.land.color }}"-->
-				<td class="{{ field.classes() }}">{{ field.index }}</td>
+				<td class="{{ field.classes() }}">
+					{% if field.land in auction %}
+						{{ auction.index(field.land) + 1 }}
+					{% endif %}
+					{% if field.land in upcoming_auction %}
+						{{ upcoming_auction.index(field.land) + 4 }}
+					{% endif %}
+				</td>
 				{% endfor %}
 			</tr>
 			{% endfor %}
