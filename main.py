@@ -20,9 +20,11 @@ class Game(ndb.Model):
     start_money = ndb.FloatProperty()
     new_money = ndb.FloatProperty()
     final_payout = ndb.FloatProperty()
+    auction_type = ndb.TextProperty()
 
     @classmethod
-    def new_game(cls, auction_size=3, start_money=1000, new_money=100, final_payout=500):
+    def new_game(cls, auction_size=3, start_money=1000, new_money=100,
+                 final_payout=500, auction_type='2nd_price'):
         board = Board(size=(8, 8))
         auction = sample(board.lands, auction_size)
         upcoming_auction = sample(board.lands - set(auction), auction_size)
@@ -38,6 +40,7 @@ class Game(ndb.Model):
             start_money=start_money,
             new_money=new_money,
             final_payout=final_payout,
+            auction_type=auction_type,
         )
 
     @property
@@ -65,15 +68,19 @@ class Game(ndb.Model):
                 p.bids[i] = min(p.bids[i], p.money)
 
             # detect winner
-            bidding_players = sorted((p for p in self.players if p.bids[i]),
-                                     key=lambda p: -p.bids[i])
+            bidding_players = sorted(self.players, key=lambda p: -p.bids[i])
             if not bidding_players:
                 continue
             winner = bidding_players[0]
 
             # transfer land to winner
             land = self.auction[i]
-            price = winner.bids[i]
+            if self.auction_type == '1st_price':
+                price = winner.bids[i]
+            elif self.auction_type == '2nd_price':
+                price = bidding_players[1].bids[i]
+            else:
+                raise Exception('Unknown auction type')
             winner.money -= price
             land.owner = winner
             self.state['last_auction'].append(dict(player=winner, land=land, price=price))
