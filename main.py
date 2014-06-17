@@ -98,7 +98,7 @@ class Game(ndb.Model):
         self.players.sort(key=lambda p: (-p.connected_lands, p.money))
         payouts = list(reversed(range(len(self.players))))
         total_payout = (
-            self.new_money if self.upcoming_auction
+            self.new_money if self.auction
             else self.final_payout)
         scaling = total_payout / sum(payouts)
         for payout, player in zip(payouts, self.players):
