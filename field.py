@@ -89,7 +89,7 @@ class Board():
 
         self.calc_neighbors()
 
-        for i in range(22):
+        for i in range(27):
             land = choice(list(self.lands))
             joined_land = choice(list(land.neighbors))
             land.add_land(joined_land)

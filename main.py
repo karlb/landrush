@@ -24,7 +24,7 @@ class Game(ndb.Model):
 
     @classmethod
     def new_game(cls, auction_size=3, start_money=1000, new_money=100,
-                 final_payout=500, auction_type='2nd_price'):
+                 final_payout=500, auction_type='1st_price'):
         board = Board(size=(8, 8))
         auction = sample(board.lands, auction_size)
         upcoming_auction = sample(board.lands - set(auction), auction_size)
@@ -168,6 +168,7 @@ class MainPage(webapp2.RequestHandler):
     def show_game(self, game, player):
         template_values = dict(players=game.players, player=player)
         template_values.update(game.state)
+        template_values['len'] = len
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
 

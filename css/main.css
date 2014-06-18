@@ -32,6 +32,13 @@ td.highlight {
 .active_player {
   background-color: lightgray;
 }
+.in_this_auction {
+  font-size: 150%;
+}
+.in_next_auction {
+  font-size: 80%;
+  color: gray;
+}
 .free-land-1 {
   background-color: #FFFFFF;
 }

@@ -21,11 +21,21 @@
 				<!--td style="background-color: {{ field.land.color }}"-->
 				<td class="{{ field.classes() }}">
 					{% if field.land in auction %}
+						<span class="in_this_auction">
 						{{ auction.index(field.land) + 1 }}
+						<span>
 					{% endif %}
 					{% if field.land in upcoming_auction %}
-						{{ upcoming_auction.index(field.land) + 4 }}
+						<span class="in_next_auction">
+						{{ upcoming_auction.index(field.land) + len(auction) +1 }}
+						</span>
 					{% endif %}
+					{% for auction_result in last_auction %}
+						{% if auction_result['land'] == field.land %}
+							sold for<br/>
+							{{auction_result['price'] }}
+						{% endif %}
+					{% endfor %}
 				</td>
 				{% endfor %}
 			</tr>
@@ -36,7 +46,7 @@
 			<h3>Current Auction</h3>
 			{% for land in auction %}
 			<div class="auction-land" data-land="{{ land.id }}">
-				{{ loop.index }}: {{ land | land }}
+				{{ loop.index }}:
 				{% if player %}
 					<input name="bid" value="{{ player.bids[loop.index0] or 0 }}">
 				{% endif %}
@@ -47,24 +57,24 @@
 			{% endif %}
 		</form>
 
-		<div class="auction" method="POST">
+		<!--div class="auction" method="POST">
 			<h3>Upcoming Auction</h3>
 			{% for land in upcoming_auction %}
 			<div class="auction-land" data-land="{{ land.id }}">
-				{{ loop.index }}: {{ land.fields }}
+				{{ loop.index + len(auction) }}: {{ land.fields }}
 			</div>
 			{% endfor %}
-		</div>
+		</div-->
 
 		{% if last_auction %}
-		<div class="player_info">
+		<!--div class="player_info">
 			<h3>Auction Results</h3>
 			{% for a in last_auction %}
 			<div class="auction-land" data-land="{{ a.land.id }}">
 				{{ a.player | player }} bought {{ a.land | land }} for {{ a.price }}
 			</div>
 			{% endfor %}
-		</div>
+		</div-->
 		{% endif %}
 
 		{% if not player %}
