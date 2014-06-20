@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 {% autoescape true %}
 <html>
-    <head>
+	<head>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 		<link rel="stylesheet" href="/css/main.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<script>
 			$(function() {
 				$('.auction-land').hover(
@@ -14,103 +16,119 @@
 		</script>
 	</head>
 	<body>
-		<table class="board">
-			{% for row in board.rows %}
-			<tr>
-				{% for field in row %}
-				<!--td style="background-color: {{ field.land.color }}"-->
-				<td class="{{ field.classes() }}">
-					{% if field.land in auction %}
-						<span class="in_this_auction">
-						{{ auction.index(field.land) + 1 }}
-						<span>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-8">
+					<table class="board ">
+						{% for row in board.rows %}
+						<tr>
+							{% for field in row %}
+							<!--td style="background-color: {{ field.land.color }}"-->
+							<td class="{{ field.classes() }}">
+								{% if field.land in auction %}
+									<span class="in_this_auction">
+									{{ auction.index(field.land) + 1 }}
+									<span>
+								{% endif %}
+								{% if field.land in upcoming_auction %}
+									<span class="in_next_auction">
+									{{ upcoming_auction.index(field.land) + len(auction) +1 }}
+									</span>
+								{% endif %}
+								{% for auction_result in last_auction %}
+									{% if auction_result['land'] == field.land %}
+										sold for<br/>
+										{{auction_result['price'] }}
+									{% endif %}
+								{% endfor %}
+							</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+
+				<div class="col-sm-4">
+					{% if player %}
+					<div class="panel panel-default">
+						<div class="panel-heading">Current Auction</div>
+						<div class="panel-body">
+							<form class="form-horizontal" method="POST">
+								{% for land in auction %}
+								<div class="form-group auction-land" data-land="{{ land.id }}">
+									<label class="col-xs-2 control-label">{{ loop.index }}</label>
+									<div class="col-xs-10">
+										<input type="number" class="form-control input-sm" name="bid" value="{{ player.bids[loop.index0] or 0 }}">
+									</div>
+								</div>
+								{% endfor %}
+								<div class="form-group">
+									<div class="col-xs-offset-2 col-xs-10">
+										<button type="submit" class="btn btn-primary">Place Bids</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
 					{% endif %}
-					{% if field.land in upcoming_auction %}
-						<span class="in_next_auction">
-						{{ upcoming_auction.index(field.land) + len(auction) +1 }}
-						</span>
+
+					<!--div class="auction" method="POST">
+						<h3>Upcoming Auction</h3>
+						{% for land in upcoming_auction %}
+						<div class="auction-land" data-land="{{ land.id }}">
+							{{ loop.index + len(auction) }}: {{ land.fields }}
+						</div>
+						{% endfor %}
+					</div-->
+
+					{% if last_auction %}
+					<!--div class="player_info">
+						<h3>Auction Results</h3>
+						{% for a in last_auction %}
+						<div class="auction-land" data-land="{{ a.land.id }}">
+							{{ a.player | player }} bought {{ a.land | land }} for {{ a.price }}
+						</div>
+						{% endfor %}
+					</div-->
 					{% endif %}
-					{% for auction_result in last_auction %}
-						{% if auction_result['land'] == field.land %}
-							sold for<br/>
-							{{auction_result['price'] }}
-						{% endif %}
-					{% endfor %}
-				</td>
-				{% endfor %}
-			</tr>
-			{% endfor %}
-		</table>
 
-		<form class="auction" method="POST">
-			<h3>Current Auction</h3>
-			{% for land in auction %}
-			<div class="auction-land" data-land="{{ land.id }}">
-				{{ loop.index }}:
-				{% if player %}
-					<input name="bid" value="{{ player.bids[loop.index0] or 0 }}">
-				{% endif %}
+					{% if not player %}
+					<div class="player_info">
+						<h3>Join Game:</h3>
+						<form action="new_player" method="POST">
+							Player Name: <input name="name">
+							<br>
+							<button class="btn btn-primary">Join</button>
+						</form>
+					</div>
+					{% endif %}
+
+					{% if players %}
+					<div class="panel panel-default">
+						<div class="panel-heading">Overview</div>
+						<table class="table">
+							<tr>
+								<th></th>
+								<th>Player</th>
+								<th>Power</th>
+								<th>Money</th>
+								<th>Last Payout</th>
+							</tr>
+							{% for p in players %}
+							<tr {% if p == player %}class="active_player"{% endif %}>
+								<td>{% if p.bids %}✓{% endif %}</td>
+								<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
+								<td>{{ p.connected_lands }}</td>
+								<td>{{ p.money | money }}</td>
+								<td>{{ p.payout }}</td>
+							</tr>
+							{% endfor %}
+						</table>
+					</div>
+					{% endif %}
+				</div>
 			</div>
-			{% endfor %}
-			{% if player %}
-				<button>Place Bids</button>
-			{% endif %}
-		</form>
-
-		<!--div class="auction" method="POST">
-			<h3>Upcoming Auction</h3>
-			{% for land in upcoming_auction %}
-			<div class="auction-land" data-land="{{ land.id }}">
-				{{ loop.index + len(auction) }}: {{ land.fields }}
-			</div>
-			{% endfor %}
-		</div-->
-
-		{% if last_auction %}
-		<!--div class="player_info">
-			<h3>Auction Results</h3>
-			{% for a in last_auction %}
-			<div class="auction-land" data-land="{{ a.land.id }}">
-				{{ a.player | player }} bought {{ a.land | land }} for {{ a.price }}
-			</div>
-			{% endfor %}
-		</div-->
-		{% endif %}
-
-		{% if not player %}
-		<div class="player_info">
-			<h3>Join Game:</h3>
-			<form action="new_player" method="POST">
-				Player Name: <input name="name">
-				<br>
-				<button>Join</button>
-			</form>
 		</div>
-		{% endif %}
-
-		{% if players %}
-		<div class="player_info">
-			<h3>Overview</h3>
-			<table>
-				<tr>
-					<th></th>
-					<th>Player</th>
-					<th>Power</th>
-					<th>Money</th>
-					<th>Last Payout</th>
-				</tr>
-				{% for p in players %}
-				<tr {% if p == player %}class="active_player"{% endif %}>
-					<td>{% if p.bids %}✓{% endif %}</td>
-					<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
-					<td>{{ p.connected_lands }}</td>
-					<td>{{ p.money | money }}</td>
-					<td>{{ p.payout }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-		{% endif %}
 
 	</body>
 </html>
