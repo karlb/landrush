@@ -16,18 +16,21 @@
 					function () {$('.' + this.dataset.land).removeClass('highlight')}
 				);
 
-				channel = new goog.appengine.Channel('{{ channel_token }}');
-				socket = channel.open();
-				//socket.onopen = onOpened;
-				socket.onmessage = function (message) {
-					message = $.parseJSON(message.data);
-					console.log(message);
-					if (message.turn > turn) {
-						document.location.reload(true);
-					}
-				};
-				//socket.onerror = onError;
-				//socket.onclose = onClose;
+				var channel_token = '{{ channel_token }}';
+				if (channel_token) {
+					channel = new goog.appengine.Channel(channel_token);
+					socket = channel.open();
+					//socket.onopen = onOpened;
+					socket.onmessage = function (message) {
+						message = $.parseJSON(message.data);
+						console.log(message);
+						if (message.turn > turn) {
+							document.location.reload(true);
+						}
+					};
+					//socket.onerror = onError;
+					//socket.onclose = onClose;
+				}
 			});
 		</script>
 	</head>
