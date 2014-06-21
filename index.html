@@ -55,7 +55,7 @@
 								{% elif field.land in last_auction %}
 									<td class="{{ field.classes() }} in_last_auction">
 										<span style="font-size: 60%">sold for</span><br/>
-										{{ field.land.price }}
+										{{ field.land.price | money }}
 									</td>
 								{% else %}
 									<td class="{{ field.classes() }}">
@@ -81,7 +81,7 @@
 											{% if loop.index0 == 0 %}autofocus{% endif %}
 											required min="0" max="{{player.money}}"
 											class="form-control input-sm"
-											name="bid" value="{{ player.bids[loop.index0] or '' }}">
+											name="bid" value="{{ player.bids[loop.index0] | money }}">
 									</div>
 								</div>
 								{% endfor %}
