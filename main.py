@@ -6,6 +6,7 @@ from random import sample, randint
 from google.appengine.ext import ndb
 from itertools import chain
 from google.appengine.api import channel
+from google.appengine.runtime.apiproxy_errors import OverQuotaError
 
 from field import Board
 from view import jinja_filters
@@ -181,7 +182,10 @@ class MainPage(webapp2.RequestHandler):
         template_values['len'] = len
         if player:
             client_id = '%d/%d' % (game.key.id(), player.id)
-            template_values['channel_token'] = channel.create_channel(client_id)
+            try:
+                template_values['channel_token'] = channel.create_channel(client_id)
+            except OverQuotaError:
+                pass
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
 
