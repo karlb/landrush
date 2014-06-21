@@ -77,7 +77,7 @@ class Game(ndb.Model):
                 p.bids[i] = min(p.bids[i], p.money)
 
             # detect winner
-            bidding_players = sorted(self.players, key=lambda p: -p.bids[i])
+            bidding_players = sorted(self.players, key=lambda p: (-p.bids[i], randint(0, 1000)))
             if not bidding_players:
                 continue
             winner = bidding_players[0]
@@ -113,7 +113,7 @@ class Game(ndb.Model):
         self.turn += 1
 
     def distribute_money(self):
-        self.players.sort(key=lambda p: (-p.connected_lands, -p.money))
+        self.players.sort(key=lambda p: (-p.connected_lands, -p.money, randint(0, 1000)))
         payouts = list(reversed(range(len(self.players))))
         total_payout = self.new_money
         if not self.auction:
