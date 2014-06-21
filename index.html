@@ -15,6 +15,8 @@
 				auction_inputs.focus(function () {$('.' + this.dataset.land).addClass('highlight')});
 				auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
 
+				$('td[data-land]').click(function() { $('input[data-land=' + this.dataset.land + ']').focus(); });
+
 				var channel_token = '{{ channel_token }}';
 				if (channel_token) {
 					channel = new goog.appengine.Channel(channel_token);
@@ -42,24 +44,23 @@
 						<tr>
 							{% for field in row %}
 							<!--td style="background-color: {{ field.land.color }}"-->
-							<td class="{{ field.classes() }}">
 								{% if field.land in auction %}
-									<span class="in_this_auction">
+									<td class="{{ field.classes() }} in_this_auction" data-land="{{field.land.id}}">
 									{{ auction.index(field.land) + 1 }}
-									<span>
-								{% endif %}
-								{% if field.land in upcoming_auction %}
-									<span class="in_next_auction">
+									</td>
+								{% elif field.land in upcoming_auction %}
+									<td class="{{ field.classes() }} in_next_auction">
 									{{ upcoming_auction.index(field.land) + len(auction) +1 }}
-									</span>
-								{% endif %}
-								{% for auction_result in last_auction %}
-									{% if auction_result['land'] == field.land %}
+									</td>
+								{% elif field.land in last_auction %}
+									<td class="{{ field.classes() }} in_last_auction">
 										<span style="font-size: 60%">sold for</span><br/>
-										{{auction_result['price'] }}
-									{% endif %}
-								{% endfor %}
-							</td>
+										{{ field.land.price }}
+									</td>
+								{% else %}
+									<td class="{{ field.classes() }}">
+									</td>
+								{% endif %}
 							{% endfor %}
 						</tr>
 						{% endfor %}
@@ -92,26 +93,6 @@
 							</form>
 						</div>
 					</div>
-					{% endif %}
-
-					<!--div class="auction" method="POST">
-						<h3>Upcoming Auction</h3>
-						{% for land in upcoming_auction %}
-						<div class="auction-land" data-land="{{ land.id }}">
-							{{ loop.index + len(auction) }}: {{ land.fields }}
-						</div>
-						{% endfor %}
-					</div-->
-
-					{% if last_auction %}
-					<!--div class="player_info">
-						<h3>Auction Results</h3>
-						{% for a in last_auction %}
-						<div class="auction-land" data-land="{{ a.land.id }}">
-							{{ a.player | player }} bought {{ a.land | land }} for {{ a.price }}
-						</div>
-						{% endfor %}
-					</div-->
 					{% endif %}
 
 					{% if not player %}
