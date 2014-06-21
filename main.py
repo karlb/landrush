@@ -92,7 +92,8 @@ class Game(ndb.Model):
                 raise Exception('Unknown auction type')
             winner.money -= price
             land.owner = winner
-            self.state['last_auction'].append(dict(player=winner, land=land, price=price))
+            land.price = price
+            self.state['last_auction'].append(land)
 
         # clear bids
         for p in self.players:
