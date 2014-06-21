@@ -11,10 +11,9 @@
 			var turn = {{ game.turn }};
 
 			$(function() {
-				$('.auction-land').hover(
-					function () {$('.' + this.dataset.land).addClass('highlight')},
-					function () {$('.' + this.dataset.land).removeClass('highlight')}
-				);
+				var auction_inputs = $('.auction-land input');
+				auction_inputs.focus(function () {$('.' + this.dataset.land).addClass('highlight')});
+				auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
 
 				var channel_token = '{{ channel_token }}';
 				if (channel_token) {
@@ -74,10 +73,10 @@
 						<div class="panel-body">
 							<form class="form-horizontal" method="POST">
 								{% for land in auction %}
-								<div class="form-group auction-land" data-land="{{ land.id }}">
+								<div class="form-group auction-land">
 									<label class="col-xs-2 control-label">{{ loop.index }}</label>
 									<div class="col-xs-10">
-										<input type="number"
+										<input type="number" data-land="{{ land.id }}"
 											{% if loop.index0 == 0 %}autofocus{% endif %}
 											required min="0" max="{{player.money}}"
 											class="form-control input-sm"

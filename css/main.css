@@ -31,7 +31,7 @@ body {
   border-right-width: 3px;
 }
 td.highlight {
-  background-color: green !important;
+  background-color: lightgreen !important;
 }
 .active_player {
   background-color: lightgray;
