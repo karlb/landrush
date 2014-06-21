@@ -6,12 +6,28 @@
 		<link rel="stylesheet" href="/css/main.css">
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<script type="text/javascript" src="/_ah/channel/jsapi"></script>
 		<script>
+			var turn = {{ game.turn }};
+
 			$(function() {
 				$('.auction-land').hover(
 					function () {$('.' + this.dataset.land).addClass('highlight')},
 					function () {$('.' + this.dataset.land).removeClass('highlight')}
 				);
+
+				channel = new goog.appengine.Channel('{{ channel_token }}');
+				socket = channel.open();
+				//socket.onopen = onOpened;
+				socket.onmessage = function (message) {
+					message = $.parseJSON(message.data);
+					console.log(message);
+					if (message.turn > turn) {
+						document.location.reload(true);
+					}
+				};
+				//socket.onerror = onError;
+				//socket.onclose = onClose;
 			});
 		</script>
 	</head>
@@ -119,7 +135,7 @@
 								<th>Last Payout</th>
 							</tr>
 							{% for p in players %}
-							<tr {% if p == player %}class="active_player"{% endif %}>
+							<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
 								<td>{% if p.bids %}✓{% endif %}</td>
 								<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
 								<td>{{ p.connected_lands }}</td>
