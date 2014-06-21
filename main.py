@@ -1,9 +1,11 @@
 import os
 import jinja2
 import webapp2
+import json
 from random import sample, randint
 from google.appengine.ext import ndb
 from itertools import chain
+from google.appengine.api import channel
 
 from field import Board
 from view import jinja_filters
@@ -22,6 +24,7 @@ class Game(ndb.Model):
     final_payout = ndb.FloatProperty()
     auction_type = ndb.TextProperty()
     status = ndb.TextProperty(default='new')
+    turn = ndb.IntegerProperty(default=0)
 
     @classmethod
     def new_game(cls, auction_size=3, start_money=1000, new_money=100,
@@ -105,6 +108,7 @@ class Game(ndb.Model):
             p.update_connected_lands()
 
         self.distribute_money()
+        self.turn += 1
 
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -p.money))
@@ -175,6 +179,9 @@ class MainPage(webapp2.RequestHandler):
         template_values = dict(players=game.players, player=player, game=game)
         template_values.update(game.state)
         template_values['len'] = len
+        if player:
+            client_id = '%d/%d' % (game.key.id(), player.id)
+            template_values['channel_token'] = channel.create_channel(client_id)
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
 
@@ -187,6 +194,18 @@ def get_game(game_id, player_id):
     else:
         player = None
     return game, player
+
+
+def send_updates(game, player):
+    for p in game.players:
+        if p == player:
+            continue
+        client_id = '%d/%d' % (game.key.id(), p.id)
+        message = dict(
+            turn=game.turn,
+            finished_players=[p.id for p in game.players]
+        )
+        channel.send_message(client_id, json.dumps(message))
 
 
 class ShowGame(MainPage):
@@ -202,6 +221,7 @@ class ShowGame(MainPage):
                        for b in self.request.POST.getall('bid')]
         if all(p.bids is not None for p in game.players):
             game.resolve_auction()
+        send_updates(game, player)
         game.put()
         self.redirect("/game/%d/%s" % (game.key.id(), player.id))
 
