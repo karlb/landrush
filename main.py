@@ -261,10 +261,17 @@ class ResolveAuction(webapp2.RequestHandler):
         self.redirect("/game/%d/" % game.key.id())
 
 
+class RedirectToGame(webapp2.RequestHandler):
+
+    def get(self, game_id):
+        self.redirect("/game/%s/" % game_id)
+
+
 application = webapp2.WSGIApplication([
     (r'/', MainPage),
     (r'/new_game', NewGame),
     (r'/game/(\d+)/(\d*)', ShowGame),
+    (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
     (r'/game/(\d+)/resolve_auction', ResolveAuction),
 ], debug=True)
