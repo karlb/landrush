@@ -1,8 +1,13 @@
 body {
-  padding: 1%;
+  padding: 15px 0;
+}
+#main-container {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .board {
-  margin-bottom: 1%;
+  margin-bottom: 15px;
   width: 100%;
   height: 400px;
   border-collapse: collapse;
@@ -11,6 +16,7 @@ body {
 .board td {
   border: 0 solid black;
   text-align: center;
+  height: 40px;
 }
 .board .top_border {
   border-top-width: 3px;
@@ -31,26 +37,25 @@ td.highlight {
   background-color: lightgray;
 }
 .in_this_auction {
-  font-size: 150%;
+  font-size: 200%;
 }
 .in_next_auction {
-  font-size: 80%;
   color: gray;
 }
 .free-land-1 {
   background-color: #FFFFFF;
 }
 .free-land-2 {
-  background-color: #DDDDDD;
+  background-color: #EEEEEE;
 }
 .free-land-3 {
-  background-color: #BBBBBB;
+  background-color: #DDDDDD;
 }
 .free-land-4 {
-  background-color: #999999;
+  background-color: #CCCCCC;
 }
 .free-land-5 {
-  background-color: #777777;
+  background-color: #BBBBBB;
 }
 .background-p1 {
   background-color: #f15854;

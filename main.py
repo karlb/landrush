@@ -21,6 +21,7 @@ class Game(ndb.Model):
     new_money = ndb.FloatProperty()
     final_payout = ndb.FloatProperty()
     auction_type = ndb.TextProperty()
+    status = ndb.TextProperty(default='new')
 
     @classmethod
     def new_game(cls, auction_size=3, start_money=1000, new_money=100,
@@ -60,6 +61,10 @@ class Game(ndb.Model):
         return self.state['upcoming_auction']
 
     def resolve_auction(self):
+        if self.status == 'new':
+            # still waiting for more players
+            return
+
         # resolve auction
         self.state['last_auction'] = []
         for i in range(len(self.auction)):
@@ -102,11 +107,12 @@ class Game(ndb.Model):
         self.distribute_money()
 
     def distribute_money(self):
-        self.players.sort(key=lambda p: (-p.connected_lands, p.money))
+        self.players.sort(key=lambda p: (-p.connected_lands, -p.money))
         payouts = list(reversed(range(len(self.players))))
-        total_payout = (
-            self.new_money if self.auction
-            else self.final_payout)
+        total_payout = self.new_money
+        if not self.auction:
+            self.status = 'finished'
+            total_payout = self.final_payout
         scaling = total_payout / sum(payouts)
         for payout, player in zip(payouts, self.players):
             player.payout = payout * scaling
@@ -166,7 +172,7 @@ class MainPage(webapp2.RequestHandler):
         self.show_game(Game.new_game(), None)
 
     def show_game(self, game, player):
-        template_values = dict(players=game.players, player=player)
+        template_values = dict(players=game.players, player=player, game=game)
         template_values.update(game.state)
         template_values['len'] = len
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -208,6 +214,8 @@ class NewPlayer(webapp2.RequestHandler):
 
         player = Player(self.request.get('name'), game)
         game.players.append(player)
+        if len(game.players) > 1:
+            game.status = 'in_progress'
         game.put()
         self.redirect("/game/%d/%s" % (game.key.id(), player.id))
 
