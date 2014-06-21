@@ -208,7 +208,7 @@ def send_updates(game, player):
         client_id = '%d/%d' % (game.key.id(), p.id)
         message = dict(
             turn=game.turn,
-            finished_players=[p.id for p in game.players]
+            finished_players=[p.id for p in game.players if p.bids]
         )
         channel.send_message(client_id, json.dumps(message))
 
