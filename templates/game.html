@@ -125,7 +125,7 @@
 							<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
 								<td class="finished">{% if p.bids %}✓{% endif %}</td>
 								<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
-								<td>{{ p.connected_lands }}</td>
+								<td>{{ p.connected_lands }}, {{ p.lands | length }}</td>
 								<td>{{ p.money | money }}</td>
 								<td>{{ p.payout }}</td>
 							</tr>
