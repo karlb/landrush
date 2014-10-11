@@ -12,7 +12,7 @@ from field import Board
 from view import jinja_filters
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
     extensions=['jinja2.ext.autoescape'])
 JINJA_ENVIRONMENT.filters.update(jinja_filters)
 
@@ -113,7 +113,8 @@ class Game(ndb.Model):
         self.turn += 1
 
     def distribute_money(self):
-        self.players.sort(key=lambda p: (-p.connected_lands, -p.money, randint(0, 1000)))
+        self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
+                                         -p.money, randint(0, 1000)))
         payouts = list(reversed(range(len(self.players))))
         total_payout = self.new_money
         if not self.auction:
@@ -150,7 +151,7 @@ class Player():
 
     def update_connected_lands(self):
         if not self.lands:
-            return 0
+            return
         last_islands = None
         islands = {frozenset([l]) for l in self.lands}
         while islands != last_islands:
@@ -172,7 +173,14 @@ class Player():
         return self.game_key.get()
 
 
-class MainPage(webapp2.RequestHandler):
+class IndexPage(webapp2.RequestHandler):
+
+    def get(self):
+        template = JINJA_ENVIRONMENT.get_template('index.html')
+        self.response.write(template.render())
+
+
+class GamePage(webapp2.RequestHandler):
 
     def get(self):
         self.show_game(Game.new_game(), None)
@@ -187,7 +195,7 @@ class MainPage(webapp2.RequestHandler):
                 template_values['channel_token'] = channel.create_channel(client_id)
             except OverQuotaError:
                 pass
-        template = JINJA_ENVIRONMENT.get_template('index.html')
+        template = JINJA_ENVIRONMENT.get_template('game.html')
         self.response.write(template.render(template_values))
 
 
@@ -213,7 +221,7 @@ def send_updates(game, player):
         channel.send_message(client_id, json.dumps(message))
 
 
-class ShowGame(MainPage):
+class ShowGame(GamePage):
 
     def get(self, game_id, player_id=None):
         game, player = get_game(game_id, player_id)
@@ -269,7 +277,8 @@ class RedirectToGame(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([
-    (r'/', MainPage),
+    (r'/', IndexPage),
+    (r'/game/test', GamePage),
     (r'/new_game', NewGame),
     (r'/game/(\d+)/(\d*)', ShowGame),
     (r'/game/(\d+)', RedirectToGame),
