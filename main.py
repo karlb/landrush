@@ -10,6 +10,7 @@ sys.path.insert(0, 'libs')
 from google.appengine.ext import ndb
 from google.appengine.api import channel
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
+import wtforms
 
 from field import Board
 from view import jinja_filters
@@ -22,6 +23,8 @@ JINJA_ENVIRONMENT.filters.update(jinja_filters)
 
 class Game(ndb.Model):
     state = ndb.PickleProperty()
+    number_of_players = ndb.IntegerProperty()
+    max_time = ndb.FloatProperty()
     auction_size = ndb.IntegerProperty()
     start_money = ndb.FloatProperty()
     new_money = ndb.FloatProperty()
@@ -32,7 +35,8 @@ class Game(ndb.Model):
 
     @classmethod
     def new_game(cls, auction_size=3, start_money=1000, new_money=100,
-                 final_payout=500, auction_type='1st_price'):
+                 final_payout=500, auction_type='1st_price', players=2,
+                 max_time=24):
         board = Board(size=(8, 8))
         auction = sample(board.lands, auction_size)
         upcoming_auction = sample(board.lands - set(auction), auction_size)
@@ -44,6 +48,8 @@ class Game(ndb.Model):
                 last_auction=[],
                 players=[],
             ),
+            number_of_players=players,
+            max_time=max_time,
             auction_size=auction_size,
             start_money=start_money,
             new_money=new_money,
@@ -71,6 +77,7 @@ class Game(ndb.Model):
         if self.status == 'new':
             # still waiting for more players
             return
+
 
         # resolve auction
         self.state['last_auction'] = []
@@ -251,9 +258,14 @@ class NewPlayer(webapp2.RequestHandler):
 
 class SimplePage(webapp2.RequestHandler):
 
+    def __init__(self, *args, **kwargs):
+        self.template_vars = {}
+        webapp2.RequestHandler.__init__(self, *args, **kwargs)
+
     def get(self):
         template = JINJA_ENVIRONMENT.get_template(self.template)
-        self.response.write(template.render(route=self.request.route.name))
+        self.template_vars['route'] = self.request.route.name
+        self.response.write(template.render(self.template_vars))
 
 
 class IndexPage(SimplePage):
@@ -261,12 +273,27 @@ class IndexPage(SimplePage):
     template = 'index.html'
 
 
+class NewGameForm(wtforms.Form):
+
+    players = wtforms.SelectField('Number of Players',
+                                  choices=zip(range(2,11), range(2,11)),
+                                  default=4, coerce=int)
+    max_time = wtforms.SelectField('Maximum Hours per Turn',
+                                   choices=zip(range(1,49), range(1,49)),
+                                   default=24, coerce=float)
+
+
 class NewGame(SimplePage):
 
     template = 'new_game.html'
 
+    def get(self):
+        self.template_vars['form'] = NewGameForm()
+        SimplePage.get(self)
+
     def post(self):
-        game = Game.new_game()
+        form = NewGameForm(self.request.POST)
+        game = Game.new_game(**form.data)
         game.put()
         self.redirect("/game/%d/" % game.key.id())
 
