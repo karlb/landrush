@@ -1,142 +1,135 @@
-<!DOCTYPE html>
-{% autoescape true %}
-<html>
-	<head>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-		<link rel="stylesheet" href="/css/main.css">
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-		<script type="text/javascript" src="/_ah/channel/jsapi"></script>
-		<script>
-			var turn = {{ game.turn }};
+{% extends 'base.html' %}
 
-			$(function() {
-				var auction_inputs = $('.auction-land input');
-				auction_inputs.focus(function () {$('.' + this.dataset.land).addClass('highlight')});
-				auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
+{% block head %}
+	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
+	<script>
+		var turn = {{ game.turn }};
 
-				$('td[data-land]').click(function() { $('input[data-land=' + this.dataset.land + ']').focus(); });
+		$(function() {
+			var auction_inputs = $('.auction-land input');
+			auction_inputs.focus(function () {$('.' + this.dataset.land).addClass('highlight')});
+			auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
 
-				var channel_token = '{{ channel_token }}';
-				if (channel_token) {
-					channel = new goog.appengine.Channel(channel_token);
-					socket = channel.open();
-					//socket.onopen = onOpened;
-					socket.onmessage = function (message) {
-						message = $.parseJSON(message.data);
-						console.log(message);
-						if (message.turn > turn) {
-							document.location.reload(true);
-						} else {
-							$.each(message.finished_players, function(i, player_id) {
-								$('[data-player_id=' + player_id + '] .finished').html('✓');
-							});
-						}
-					};
-					//socket.onerror = onError;
-					//socket.onclose = onClose;
-				}
-			});
-		</script>
-	</head>
-	<body>
-		<div class="container-fluid" id="main-container">
-			<div class="row">
-				<div class="col-sm-8">
-					<table class="board ">
-						{% for row in board.rows %}
-						<tr>
-							{% for field in row %}
-							<!--td style="background-color: {{ field.land.color }}"-->
-								{% if field.land in auction %}
-									<td class="{{ field.classes() }} in_this_auction" data-land="{{field.land.id}}">
-									{{ auction.index(field.land) + 1 }}
-									</td>
-								{% elif field.land in upcoming_auction %}
-									<td class="{{ field.classes() }} in_next_auction">
-									{{ upcoming_auction.index(field.land) + len(auction) +1 }}
-									</td>
-								{% elif field.land in last_auction %}
-									<td class="{{ field.classes() }} in_last_auction">
-										<span style="font-size: 60%">sold for</span><br/>
-										{{ field.land.price | money }}
-									</td>
-								{% else %}
-									<td class="{{ field.classes() }}">
-									</td>
-								{% endif %}
+			$('td[data-land]').click(function() { $('input[data-land=' + this.dataset.land + ']').focus(); });
+
+			var channel_token = '{{ channel_token }}';
+			if (channel_token) {
+				channel = new goog.appengine.Channel(channel_token);
+				socket = channel.open();
+				//socket.onopen = onOpened;
+				socket.onmessage = function (message) {
+					message = $.parseJSON(message.data);
+					console.log(message);
+					if (message.turn > turn) {
+						document.location.reload(true);
+					} else {
+						$.each(message.finished_players, function(i, player_id) {
+							$('[data-player_id=' + player_id + '] .finished').html('✓');
+						});
+					}
+				};
+				//socket.onerror = onError;
+				//socket.onclose = onClose;
+			}
+		});
+	</script>
+{% endblock %}
+
+{% block main %}
+	<div class="container-fluid" id="main-container">
+		<div class="row">
+			<div class="col-sm-8">
+				<table class="board ">
+					{% for row in board.rows %}
+					<tr>
+						{% for field in row %}
+						<!--td style="background-color: {{ field.land.color }}"-->
+							{% if field.land in auction %}
+								<td class="{{ field.classes() }} in_this_auction" data-land="{{field.land.id}}">
+								{{ auction.index(field.land) + 1 }}
+								</td>
+							{% elif field.land in upcoming_auction %}
+								<td class="{{ field.classes() }} in_next_auction">
+								{{ upcoming_auction.index(field.land) + len(auction) +1 }}
+								</td>
+							{% elif field.land in last_auction %}
+								<td class="{{ field.classes() }} in_last_auction">
+									<span style="font-size: 60%">sold for</span><br/>
+									{{ field.land.price | money }}
+								</td>
+							{% else %}
+								<td class="{{ field.classes() }}">
+								</td>
+							{% endif %}
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+
+			<div class="col-sm-4">
+				{% if player and game.status in ('new', 'in_progress') %}
+				<div class="panel panel-default">
+					<div class="panel-heading">Current Auction</div>
+					<div class="panel-body">
+						<form class="form-horizontal" method="POST">
+							{% for land in auction %}
+							<div class="form-group auction-land">
+								<label class="col-xs-2 control-label">{{ loop.index }}</label>
+								<div class="col-xs-10">
+									<input type="number" data-land="{{ land.id }}"
+										{% if loop.index0 == 0 %}autofocus{% endif %}
+										required min="0" max="{{player.money}}"
+										class="form-control input-sm"
+										name="bid" value="{{ player.bids[loop.index0] | money }}">
+								</div>
+							</div>
 							{% endfor %}
+							<div class="form-group">
+								<div class="col-xs-offset-2 col-xs-10">
+									<button type="submit" class="btn btn-primary">Place Bids</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				{% endif %}
+
+				{% if not player %}
+				<div class="player_info">
+					<h3>Join Game:</h3>
+					<form action="new_player" method="POST">
+						Player Name: <input name="name">
+						<br>
+						<button class="btn btn-primary">Join</button>
+					</form>
+				</div>
+				{% endif %}
+
+				{% if players %}
+				<div class="panel panel-default">
+					<div class="panel-heading">Overview</div>
+					<table class="table">
+						<tr>
+							<th></th>
+							<th>Player</th>
+							<th>Power</th>
+							<th>Money</th>
+							<th>Last Payout</th>
+						</tr>
+						{% for p in players %}
+						<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
+							<td class="finished">{% if p.bids %}✓{% endif %}</td>
+							<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
+							<td>{{ p.connected_lands }}, {{ p.lands | length }}</td>
+							<td>{{ p.money | money }}</td>
+							<td>{{ p.payout }}</td>
 						</tr>
 						{% endfor %}
 					</table>
 				</div>
-
-				<div class="col-sm-4">
-					{% if player and game.status in ('new', 'in_progress') %}
-					<div class="panel panel-default">
-						<div class="panel-heading">Current Auction</div>
-						<div class="panel-body">
-							<form class="form-horizontal" method="POST">
-								{% for land in auction %}
-								<div class="form-group auction-land">
-									<label class="col-xs-2 control-label">{{ loop.index }}</label>
-									<div class="col-xs-10">
-										<input type="number" data-land="{{ land.id }}"
-											{% if loop.index0 == 0 %}autofocus{% endif %}
-											required min="0" max="{{player.money}}"
-											class="form-control input-sm"
-											name="bid" value="{{ player.bids[loop.index0] | money }}">
-									</div>
-								</div>
-								{% endfor %}
-								<div class="form-group">
-									<div class="col-xs-offset-2 col-xs-10">
-										<button type="submit" class="btn btn-primary">Place Bids</button>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
-					{% endif %}
-
-					{% if not player %}
-					<div class="player_info">
-						<h3>Join Game:</h3>
-						<form action="new_player" method="POST">
-							Player Name: <input name="name">
-							<br>
-							<button class="btn btn-primary">Join</button>
-						</form>
-					</div>
-					{% endif %}
-
-					{% if players %}
-					<div class="panel panel-default">
-						<div class="panel-heading">Overview</div>
-						<table class="table">
-							<tr>
-								<th></th>
-								<th>Player</th>
-								<th>Power</th>
-								<th>Money</th>
-								<th>Last Payout</th>
-							</tr>
-							{% for p in players %}
-							<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
-								<td class="finished">{% if p.bids %}✓{% endif %}</td>
-								<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
-								<td>{{ p.connected_lands }}, {{ p.lands | length }}</td>
-								<td>{{ p.money | money }}</td>
-								<td>{{ p.payout }}</td>
-							</tr>
-							{% endfor %}
-						</table>
-					</div>
-					{% endif %}
-				</div>
+				{% endif %}
 			</div>
 		</div>
-
-	</body>
-</html>
-{% endautoescape %}
+	</div>
+{% endblock %}
