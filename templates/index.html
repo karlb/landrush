@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-{% autoescape true %}
-<html>
-	<head>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+{% extends 'base.html' %}
 
+{% block head %}
 		<style>
 			/* Space out content a bit */
 			body {
@@ -93,59 +88,55 @@
 				box-shadow: 0px 0px 10px #888888;
 			}
 		</style>
-	</head>
-	<body>
+{% endblock  %}
 
-		<div class="container">
-			<div class="header">
-				<ul class="nav nav-pills pull-right">
-					<li class="active"><a href="#">Home</a></li>
-					<li><a href="#">New Game</a></li>
-					<li><a href="karl42@gmail.com">Contact</a></li>
-				</ul>
-				<h3 class="text-muted">Land Rush</h3>
+{% block main %}
+	<div class="container">
+		<div class="header">
+			<ul class="nav nav-pills pull-right">
+				<li class="active"><a href="#">Home</a></li>
+				<li><a href="#">New Game</a></li>
+				<li><a href="karl42@gmail.com">Contact</a></li>
+			</ul>
+			<h3 class="text-muted">Land Rush</h3>
+		</div>
+
+		<div class="jumbotron">
+			<h1>Claim the land!</h1>
+			<p class="lead">Or your opponents will claim it! Just win the land auctions and earn money back by building a powerful territory of connected fields. In the end, the most wealthy player wins.</p>
+			<p><a class="btn btn-lg btn-success" href="#" role="button">Start a new Game</a></p>
+		</div>
+
+		<div class="row screenshots">
+			<div class="col-sm-6">
+				<img src="img/screenshot.png" class="img-rounded">
+			</div>
+			<div class="col-sm-6">
+				<img src="img/screenshot2.png" class="img-rounded">
+			</div>
+		</div>
+
+		<div class="row marketing">
+			<div class="col-sm-6">
+				<h4>Get started right away</h4>
+				<p>The rules are simple and you don't have to register. Just start playing.</p>
+
+				<h4>Play with your friends</h4>
+				<p>Send a link to your friends where they can join easily.</p>
 			</div>
 
-			<div class="jumbotron">
-				<h1>Claim the land!</h1>
-				<p class="lead">Or your opponents will claim it! Just win the land auctions and earn money back by building a powerful territory of connected fields. In the end, the most wealthy player wins.</p>
-				<p><a class="btn btn-lg btn-success" href="#" role="button">Start a new Game</a></p>
+			<div class="col-sm-6">
+				<h4>Don't waste your time</h4>
+				<p>Spend just a few minutes every now and then. This game won't steal you free time with boring micro management.</p>
+
+				<h4>Focus on the fun part</h4>
+				<p>Concentrate on the exciting auctions. Nothing else will grab your attention.</p>
 			</div>
+		</div>
 
-			<div class="row screenshots">
-				<div class="col-sm-6">
-					<img src="img/screenshot.png" class="img-rounded">
-				</div>
-				<div class="col-sm-6">
-					<img src="img/screenshot2.png" class="img-rounded">
-				</div>
-			</div>
+		<div class="footer">
+			<p>by <a href="http://www.karl.berlin">Karl Bartel</a>, email: <a href="mailto:karl42@gmail.com">karl42@gmail.com<a></p>
+		</div>
 
-			<div class="row marketing">
-				<div class="col-sm-6">
-					<h4>Get started right away</h4>
-					<p>The rules are simple and you don't have to register. Just start playing.</p>
-
-					<h4>Play with your friends</h4>
-					<p>Send a link to your friends where they can join easily.</p>
-				</div>
-
-				<div class="col-sm-6">
-					<h4>Don't waste your time</h4>
-					<p>Spend just a few minutes every now and then. This game won't steal you free time with boring micro management.</p>
-
-					<h4>Focus on the fun part</h4>
-					<p>Concentrate on the exciting auctions. Nothing else will grab your attention.</p>
-				</div>
-			</div>
-
-			<div class="footer">
-				<p>by <a href="http://www.karl.berlin">Karl Bartel</a>, email: <a href="mailto:karl42@gmail.com">karl42@gmail.com<a></p>
-			</div>
-
-		</div> <!-- /container -->
-
-	</body>
-</html>
-{% endautoescape %}
-
+	</div> <!-- /container -->
+{% endblock %}
