@@ -2,9 +2,12 @@ import os
 import jinja2
 import webapp2
 import json
+import sys
 from random import sample, randint
-from google.appengine.ext import ndb
 from itertools import chain
+sys.path.insert(0, 'libs')
+
+from google.appengine.ext import ndb
 from google.appengine.api import channel
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
 
