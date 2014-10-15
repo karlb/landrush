@@ -173,13 +173,6 @@ class Player():
         return self.game_key.get()
 
 
-class IndexPage(webapp2.RequestHandler):
-
-    def get(self):
-        template = JINJA_ENVIRONMENT.get_template('index.html')
-        self.response.write(template.render())
-
-
 class GamePage(webapp2.RequestHandler):
 
     def get(self):
@@ -253,9 +246,23 @@ class NewPlayer(webapp2.RequestHandler):
         self.redirect("/game/%d/%s" % (game.key.id(), player.id))
 
 
-class NewGame(webapp2.RequestHandler):
+class SimplePage(webapp2.RequestHandler):
 
     def get(self):
+        template = JINJA_ENVIRONMENT.get_template(self.template)
+        self.response.write(template.render(route=self.request.route.name))
+
+
+class IndexPage(SimplePage):
+
+    template = 'index.html'
+
+
+class NewGame(SimplePage):
+
+    template = 'new_game.html'
+
+    def post(self):
         game = Game.new_game()
         game.put()
         self.redirect("/game/%d/" % game.key.id())
@@ -277,9 +284,9 @@ class RedirectToGame(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([
-    (r'/', IndexPage),
+    (r'/', IndexPage, 'index'),
     (r'/game/test', GamePage),
-    (r'/new_game', NewGame),
+    (r'/new_game', NewGame, 'new_game'),
     (r'/game/(\d+)/(\d*)', ShowGame),
     (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
