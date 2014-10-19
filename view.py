@@ -11,4 +11,9 @@ def land(l):
 def money(m):
     return '' if isinstance(m, Undefined) else '%d' % m
 
+
+def datetime(d):
+    return d.strftime("%Y-%m-%d %H:%M")
+
+
 jinja_filters = locals()

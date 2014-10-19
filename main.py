@@ -5,6 +5,7 @@ import json
 import sys
 from random import sample, randint
 from itertools import chain
+from datetime import datetime, timedelta
 sys.path.insert(0, 'libs')
 
 from google.appengine.ext import ndb
@@ -32,6 +33,7 @@ class Game(ndb.Model):
     auction_type = ndb.TextProperty()
     status = ndb.TextProperty(default='new')
     turn = ndb.IntegerProperty(default=0)
+    next_auction_time = ndb.DateTimeProperty()
 
     @classmethod
     def new_game(cls, auction_size=3, start_money=1000, new_money=100,
@@ -73,21 +75,29 @@ class Game(ndb.Model):
     def upcoming_auction(self):
         return self.state['upcoming_auction']
 
+    @property
+    def ready_for_auction(self):
+        if self.status != 'in_progress':
+            return False
+
+        if all(p.bids is not None for p in self.players):
+            # all players have placed bids
+            return True
+
+        return datetime.utcnow() > self.next_auction_time
+
+
     def resolve_auction(self):
-        if self.status == 'new':
-            # still waiting for more players
-            return
-
-
         # resolve auction
         self.state['last_auction'] = []
+        players = [p for p in self.players if p.bids is not None]
         for i in range(len(self.auction)):
             # reduce bids to available money
-            for p in self.players:
+            for p in players:
                 p.bids[i] = min(p.bids[i], p.money)
 
             # detect winner
-            bidding_players = sorted(self.players, key=lambda p: (-p.bids[i], randint(0, 1000)))
+            bidding_players = sorted(players, key=lambda p: (-p.bids[i], randint(0, 1000)))
             if not bidding_players:
                 continue
             winner = bidding_players[0]
@@ -114,6 +124,7 @@ class Game(ndb.Model):
         free_lands = {l for l in self.board.lands if not l.owner} - set(self.auction)
         self.state['upcoming_auction'] = sample(free_lands,
                                                 min(self.auction_size, len(free_lands)))
+        self.next_auction_time = datetime.utcnow() + timedelta(hours=self.max_time)
 
         # update connected_lands
         for p in self.players:
@@ -121,6 +132,7 @@ class Game(ndb.Model):
 
         self.distribute_money()
         self.turn += 1
+
 
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
@@ -228,6 +240,9 @@ class ShowGame(GamePage):
 
     def get(self, game_id, player_id=None):
         game, player = get_game(game_id, player_id)
+        if game.ready_for_auction:
+            game.resolve_auction()
+            game.put()
         self.show_game(game, player)
 
     def post(self, game_id, player_id):
@@ -235,7 +250,7 @@ class ShowGame(GamePage):
         game, player = get_game(game_id, player_id)
         player.bids = [float(b) if b != '' else 0
                        for b in self.request.POST.getall('bid')]
-        if all(p.bids is not None for p in game.players):
+        if game.ready_for_auction:
             game.resolve_auction()
         send_updates(game, player)
         game.put()
@@ -250,8 +265,9 @@ class NewPlayer(webapp2.RequestHandler):
 
         player = Player(self.request.get('name'), game)
         game.players.append(player)
-        if len(game.players) > 1:
+        if len(game.players) == game.number_of_players:
             game.status = 'in_progress'
+            game.next_auction_time = datetime.utcnow() + timedelta(hours=game.max_time)
         game.put()
         self.redirect("/game/%d/%s" % (game.key.id(), player.id))
 
