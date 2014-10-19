@@ -127,6 +127,9 @@
 						</tr>
 						{% endfor %}
 					</table>
+					{% if game.next_auction_time %}
+					<div class="panel-footer">Auction ends {{ game.next_auction_time | datetime }}</div>
+					{% endif %}
 				</div>
 				{% endif %}
 			</div>
