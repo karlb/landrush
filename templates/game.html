@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
+	<script src="/js/moment.min.js"></script>
 	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
 	<script>
 		var turn = {{ game.turn }};
@@ -31,6 +32,9 @@
 				//socket.onerror = onError;
 				//socket.onclose = onClose;
 			}
+
+			var next_auction = moment.utc('{{ game.next_auction_time.isoformat() }}').fromNow();
+			$('#time').html(next_auction);
 		});
 	</script>
 {% endblock %}
@@ -128,7 +132,8 @@
 						{% endfor %}
 					</table>
 					{% if game.next_auction_time %}
-					<div class="panel-footer">Auction ends {{ game.next_auction_time | datetime }}</div>
+					<div class="panel-footer">Auction ends <span id="time"></span>
+					</div>
 					{% endif %}
 				</div>
 				{% endif %}
