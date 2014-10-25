@@ -33,9 +33,16 @@
 				//socket.onclose = onClose;
 			}
 
-			{% if game.next_auction %}
-				var next_auction = moment.utc('{{ game.next_auction_time.isoformat() }}').fromNow();
-				$('#time').html(next_auction);
+			{% if game.next_auction_time %}
+				function update_auction_end() {
+					var next_auction = moment.utc('{{ game.next_auction_time.isoformat() }}').fromNow();
+					$('#time').html(next_auction);
+				}
+
+				update_auction_end();
+				setTimeout(function(){
+					update_auction_end();
+				}, 5000);
 			{% endif %}
 		});
 	</script>
