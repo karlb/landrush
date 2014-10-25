@@ -33,14 +33,32 @@
 				//socket.onclose = onClose;
 			}
 
-			var next_auction = moment.utc('{{ game.next_auction_time.isoformat() }}').fromNow();
-			$('#time').html(next_auction);
+			{% if game.next_auction %}
+				var next_auction = moment.utc('{{ game.next_auction_time.isoformat() }}').fromNow();
+				$('#time').html(next_auction);
+			{% endif %}
 		});
 	</script>
 {% endblock %}
 
 {% block body %}
 	<div class="container-fluid" id="main-container">
+
+		<!-- flashed messages -->
+		{% set messages = handler.session.get_flashes() %}
+		{% if messages %}
+			<div class="flashes">
+				{% for message, category in messages %}
+				<div class="alert alert-{{ category.replace('error', 'danger').replace('message', 'info') }} alert-dismissible">
+					<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span>
+					<span class="sr-only">Close</span></button>
+
+					{{ message }}
+				</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+
 		<div class="row">
 			<div class="col-sm-8">
 				<table class="board ">
@@ -101,12 +119,18 @@
 
 				{% if not player %}
 				<div class="player_info">
-					<h3>Join Game:</h3>
-					<form action="new_player" method="POST">
-						Player Name: <input name="name">
-						<br>
-						<button class="btn btn-primary">Join</button>
-					</form>
+					{% if game.status == 'new' %}
+						<h3>Join Game:</h3>
+						<form action="new_player" method="POST">
+							Player Name: <input name="name">
+							<br>
+							<button class="btn btn-primary">Join</button>
+						</form>
+					{% else %}
+						<div class="well">
+							The game is already in progress, so no new players are allowed.
+						</div>
+					{% endif %}
 				</div>
 				{% endif %}
 

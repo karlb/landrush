@@ -11,10 +11,16 @@ sys.path.insert(0, 'libs')
 from google.appengine.ext import ndb
 from google.appengine.api import channel
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
+from webapp2_extras import sessions
 import wtforms
 
 from field import Board
 from view import jinja_filters
+
+config = {}
+config['webapp2_extras.sessions'] = {
+    'secret_key': 'my-super-secret-key',
+}
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
@@ -195,23 +201,53 @@ class Player():
         return self.game_key.get()
 
 
-class GamePage(webapp2.RequestHandler):
+class BaseHandler(webapp2.RequestHandler):
+
+    def __init__(self, *args, **kwargs):
+        self.template_vars = {
+            'handler': self,
+        }
+        webapp2.RequestHandler.__init__(self, *args, **kwargs)
+
+    def get(self):
+        template = JINJA_ENVIRONMENT.get_template(self.template)
+        self.template_vars['route'] = self.request.route.name
+        self.response.write(template.render(self.template_vars))
+
+    def dispatch(self):
+        # Get a session store for this request.
+        self.session_store = sessions.get_store(request=self.request)
+
+        try:
+            # Dispatch the request.
+            webapp2.RequestHandler.dispatch(self)
+        finally:
+            # Save all sessions.
+            self.session_store.save_sessions(self.response)
+
+    @webapp2.cached_property
+    def session(self):
+        # Returns a session using the default cookie key.
+        return self.session_store.get_session()
+
+
+class GamePage(BaseHandler):
+    template = 'game.html'
 
     def get(self):
         self.show_game(Game.new_game(), None)
 
     def show_game(self, game, player):
-        template_values = dict(players=game.players, player=player, game=game)
-        template_values.update(game.state)
-        template_values['len'] = len
+        self.template_vars.update(dict(players=game.players, player=player, game=game))
+        self.template_vars.update(game.state)
+        self.template_vars['len'] = len
         if player:
             client_id = '%d/%d' % (game.key.id(), player.id)
             try:
-                template_values['channel_token'] = channel.create_channel(client_id)
+                self.template_vars['channel_token'] = channel.create_channel(client_id)
             except OverQuotaError:
                 pass
-        template = JINJA_ENVIRONMENT.get_template('game.html')
-        self.response.write(template.render(template_values))
+        BaseHandler.get(self)
 
 
 def get_game(game_id, player_id):
@@ -257,7 +293,7 @@ class ShowGame(GamePage):
         self.redirect("/game/%d/%s" % (game.key.id(), player.id))
 
 
-class NewPlayer(webapp2.RequestHandler):
+class NewPlayer(BaseHandler):
 
     def post(self, game_id):
         game = ndb.Key(Game, int(game_id)).get()
@@ -269,22 +305,12 @@ class NewPlayer(webapp2.RequestHandler):
             game.status = 'in_progress'
             game.next_auction_time = datetime.utcnow() + timedelta(hours=game.max_time)
         game.put()
+        self.session.add_flash('Joined successfully! Please bookmark this URL '
+                               'to keep playing as this user.', 'success')
         self.redirect("/game/%d/%s" % (game.key.id(), player.id))
 
 
-class SimplePage(webapp2.RequestHandler):
-
-    def __init__(self, *args, **kwargs):
-        self.template_vars = {}
-        webapp2.RequestHandler.__init__(self, *args, **kwargs)
-
-    def get(self):
-        template = JINJA_ENVIRONMENT.get_template(self.template)
-        self.template_vars['route'] = self.request.route.name
-        self.response.write(template.render(self.template_vars))
-
-
-class IndexPage(SimplePage):
+class IndexPage(BaseHandler):
 
     template = 'index.html'
 
@@ -299,22 +325,25 @@ class NewGameForm(wtforms.Form):
                                    default=24, coerce=float)
 
 
-class NewGame(SimplePage):
+class NewGame(BaseHandler):
 
     template = 'new_game.html'
 
     def get(self):
         self.template_vars['form'] = NewGameForm()
-        SimplePage.get(self)
+        BaseHandler.get(self)
 
     def post(self):
         form = NewGameForm(self.request.POST)
         game = Game.new_game(**form.data)
         game.put()
+        self.session.add_flash(
+            'Game created succesfully! Please send the current URL to other '
+            'people to allow them to join the game.', 'success')
         self.redirect("/game/%d/" % game.key.id())
 
 
-class ResolveAuction(webapp2.RequestHandler):
+class ResolveAuction(BaseHandler):
 
     def get(self, game_id):
         game, _ = get_game(game_id, None)
@@ -323,7 +352,7 @@ class ResolveAuction(webapp2.RequestHandler):
         self.redirect("/game/%d/" % game.key.id())
 
 
-class RedirectToGame(webapp2.RequestHandler):
+class RedirectToGame(BaseHandler):
 
     def get(self, game_id):
         self.redirect("/game/%s/" % game_id)
@@ -337,4 +366,4 @@ application = webapp2.WSGIApplication([
     (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
     (r'/game/(\d+)/resolve_auction', ResolveAuction),
-], debug=True)
+], debug=True, config=config)
