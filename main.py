@@ -3,8 +3,6 @@ import jinja2
 import webapp2
 import json
 import sys
-from random import sample, randint
-from itertools import chain
 from datetime import datetime, timedelta
 sys.path.insert(0, 'libs')
 
@@ -14,8 +12,8 @@ from google.appengine.runtime.apiproxy_errors import OverQuotaError
 from webapp2_extras import sessions
 import wtforms
 
-from field import Board
 from view import jinja_filters
+from model import Game, Player
 
 config = {}
 config['webapp2_extras.sessions'] = {
@@ -26,179 +24,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
     autoescape=True)
 JINJA_ENVIRONMENT.filters.update(jinja_filters)
-
-
-class Game(ndb.Model):
-    state = ndb.PickleProperty()
-    number_of_players = ndb.IntegerProperty()
-    max_time = ndb.FloatProperty()
-    auction_size = ndb.IntegerProperty()
-    start_money = ndb.FloatProperty()
-    new_money = ndb.FloatProperty()
-    final_payout = ndb.FloatProperty()
-    auction_type = ndb.TextProperty()
-    status = ndb.TextProperty(default='new')
-    turn = ndb.IntegerProperty(default=0)
-    next_auction_time = ndb.DateTimeProperty()
-
-    @classmethod
-    def new_game(cls, auction_size=3, start_money=1000, new_money=100,
-                 final_payout=500, auction_type='1st_price', players=2,
-                 max_time=24):
-        board = Board(size=(8, 8))
-        auction = sample(board.lands, auction_size)
-        upcoming_auction = sample(board.lands - set(auction), auction_size)
-        return cls(
-            state=dict(
-                board=board,
-                auction=auction,
-                upcoming_auction=upcoming_auction,
-                last_auction=[],
-                players=[],
-            ),
-            number_of_players=players,
-            max_time=max_time,
-            auction_size=auction_size,
-            start_money=start_money,
-            new_money=new_money,
-            final_payout=final_payout,
-            auction_type=auction_type,
-        )
-
-    @property
-    def board(self):
-        return self.state['board']
-
-    @property
-    def players(self):
-        return self.state['players']
-
-    @property
-    def auction(self):
-        return self.state['auction']
-
-    @property
-    def upcoming_auction(self):
-        return self.state['upcoming_auction']
-
-    @property
-    def ready_for_auction(self):
-        if self.status != 'in_progress':
-            return False
-
-        if all(p.bids is not None for p in self.players):
-            # all players have placed bids
-            return True
-
-        return datetime.utcnow() > self.next_auction_time
-
-
-    def resolve_auction(self):
-        # resolve auction
-        self.state['last_auction'] = []
-        players = [p for p in self.players if p.bids is not None]
-        for i in range(len(self.auction)):
-            # reduce bids to available money
-            for p in players:
-                p.bids[i] = min(p.bids[i], p.money)
-
-            # detect winner
-            bidding_players = sorted(players, key=lambda p: (-p.bids[i], randint(0, 1000)))
-            if not bidding_players:
-                continue
-            winner = bidding_players[0]
-
-            # transfer land to winner
-            land = self.auction[i]
-            if self.auction_type == '1st_price':
-                price = winner.bids[i]
-            elif self.auction_type == '2nd_price':
-                price = bidding_players[1].bids[i]
-            else:
-                raise Exception('Unknown auction type')
-            winner.money -= price
-            land.owner = winner
-            land.price = price
-            self.state['last_auction'].append(land)
-
-        # clear bids
-        for p in self.players:
-            p.bids = None
-
-        # prepare next auction
-        self.state['auction'] = self.upcoming_auction
-        free_lands = {l for l in self.board.lands if not l.owner} - set(self.auction)
-        self.state['upcoming_auction'] = sample(free_lands,
-                                                min(self.auction_size, len(free_lands)))
-        self.next_auction_time = datetime.utcnow() + timedelta(hours=self.max_time)
-
-        # update connected_lands
-        for p in self.players:
-            p.update_connected_lands()
-
-        self.distribute_money()
-        self.turn += 1
-
-
-    def distribute_money(self):
-        self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
-                                         -p.money, randint(0, 1000)))
-        payouts = list(reversed(range(len(self.players))))
-        total_payout = self.new_money
-        if not self.auction:
-            self.status = 'finished'
-            total_payout = self.final_payout
-        scaling = total_payout / sum(payouts)
-        for payout, player in zip(payouts, self.players):
-            player.payout = payout * scaling
-            player.money += player.payout
-
-
-def flatten(listOfLists):
-    "Flatten one level of nesting"
-    return chain.from_iterable(listOfLists)
-
-
-class Player():
-    #name = ndb.TextProperty()
-    #money = ndb.FloatProperty()
-    #bids = ndb.FloatProperty(repeated=True)
-    #id = ndb.IntegerProperty()
-    #player_number = ndb.IntegerProperty()
-    #connected_lands = ndb.IntegerProperty()
-    #game_key = ndb.KeyProperty(kind=Game)
-
-    def __init__(self, name, game):
-        self.name = name
-        self.money = game.start_money
-        self.bids = None
-        self.id = randint(1, 10000000)
-        self.player_number = len(game.players) + 1
-        self.connected_lands = 0
-        self.game_key = game.key
-
-    def update_connected_lands(self):
-        if not self.lands:
-            return
-        last_islands = None
-        islands = {frozenset([l]) for l in self.lands}
-        while islands != last_islands:
-            last_islands = islands
-            islands = {
-                frozenset(
-                    l for l in flatten(
-                        land.neighbors.union({land}) for land in i
-                    ) if l.owner and l.owner.id == self.id
-                ) for i in islands}
-        self.connected_lands = max(len(i) for i in islands)
-
-    @property
-    def lands(self):
-        return {l for l in self.game.board.lands if l.owner and l.owner.id == self.id}
-
-    @property
-    def game(self):
-        return self.game_key.get()
 
 
 class BaseHandler(webapp2.RequestHandler):
@@ -303,7 +128,8 @@ class NewPlayer(BaseHandler):
         game.players.append(player)
         if len(game.players) == game.number_of_players:
             game.status = 'in_progress'
-            game.next_auction_time = datetime.utcnow() + timedelta(hours=game.max_time)
+            game.next_auction_time = (
+                datetime.utcnow() + timedelta(hours=game.max_time))
         game.put()
         self.session.add_flash('Joined successfully! Please bookmark this URL '
                                'to keep playing as this user.', 'success')
@@ -318,10 +144,10 @@ class IndexPage(BaseHandler):
 class NewGameForm(wtforms.Form):
 
     players = wtforms.SelectField('Number of Players',
-                                  choices=zip(range(2,11), range(2,11)),
+                                  choices=zip(range(2, 11), range(2, 11)),
                                   default=4, coerce=int)
     max_time = wtforms.SelectField('Maximum Hours per Turn',
-                                   choices=zip(range(1,49), range(1,49)),
+                                   choices=zip(range(1, 49), range(1, 49)),
                                    default=24, coerce=float)
 
 
