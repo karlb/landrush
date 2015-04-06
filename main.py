@@ -146,8 +146,20 @@ class NewGameForm(wtforms.Form):
     players = wtforms.SelectField('Number of Players',
                                   choices=zip(range(2, 11), range(2, 11)),
                                   default=4, coerce=int)
-    max_time = wtforms.SelectField('Maximum Hours per Turn',
-                                   choices=zip(range(1, 49), range(1, 49)),
+    max_time = wtforms.SelectField('Maximum Time per Turn',
+                                   choices=[
+                                       (0.0166666667, '1 minute'),
+                                       (0.0833333333, '5 minutes'),
+                                       (0.25, '15 minutes'),
+                                       (1, '1 hour'),
+                                       (3, '3 hours'),
+                                       (6, '6 hours'),
+                                       (12, '12 hours'),
+                                       (24, '24 hours'),
+                                       (2 * 24, '2 days'),
+                                       (4 * 24, '4 days'),
+                                       (7 * 24, '1 week'),
+                                   ],
                                    default=24, coerce=float)
 
 
