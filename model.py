@@ -1,9 +1,12 @@
+from __future__ import division
+import math
 from random import sample, randint
 from itertools import chain
 from datetime import datetime, timedelta
 
 from google.appengine.ext import ndb
 
+import ai
 from field import Board
 
 
@@ -65,13 +68,32 @@ class Game(ndb.Model):
         if self.status != 'in_progress':
             return False
 
-        if all(p.bids is not None for p in self.players):
+        if all((p.bids is not None) or p.ai
+               for p in self.players):
             # all players have placed bids
             return True
 
         return datetime.utcnow() > self.next_auction_time
 
+    @property
+    def remaining_turns(self):
+        print '>>>', [l for l in self.board.lands if not l.owner]
+        return math.ceil(
+            len(
+                [l for l in self.board.lands if not l.owner]
+            ) / self.auction_size
+        )
+
+    @property
+    def remaining_payout(self):
+        return (self.remaining_turns - 1) * self.new_money + self.final_payout
+
     def resolve_auction(self):
+        # ai players
+        for p in self.players:
+            if p.ai:
+                p.bids = ai.calculate_bids(self, p)
+
         # resolve auction
         self.state['last_auction'] = []
         players = [p for p in self.players if p.bids is not None]
@@ -131,8 +153,17 @@ class Game(ndb.Model):
             total_payout = self.final_payout
         scaling = total_payout / sum(payouts)
         for payout, player in zip(payouts, self.players):
-            player.payout = payout * scaling
+            player.payout = round(payout * scaling)
             player.money += player.payout
+
+    def start(self):
+        self.status = 'in_progress'
+        self.next_auction_time = (
+            datetime.utcnow() + timedelta(hours=self.max_time))
+        # add AI players
+        for i in range(self.number_of_players - len(self.players)):
+            player = Player(ai.player_name(), self, ai=True)
+            self.players.append(player)
 
 
 def flatten(listOfLists):
@@ -149,7 +180,7 @@ class Player():
     #connected_lands = ndb.IntegerProperty()
     #game_key = ndb.KeyProperty(kind=Game)
 
-    def __init__(self, name, game):
+    def __init__(self, name, game, ai=False):
         self.name = name
         self.money = game.start_money
         self.bids = None
@@ -157,6 +188,7 @@ class Player():
         self.player_number = len(game.players) + 1
         self.connected_lands = 0
         self.game_key = game.key
+        self.ai = ai
 
     def update_connected_lands(self):
         if not self.lands:

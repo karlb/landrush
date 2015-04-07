@@ -154,18 +154,38 @@
 						</tr>
 						{% for p in players %}
 						<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
-							<td class="finished">{% if p.bids %}✓{% endif %}</td>
+							<td class="finished">
+								{%- if p.ai%}AI
+								{%- elif p.bids %}✓
+								{%- endif -%}
+							</td>
 							<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
 							<td>{{ p.connected_lands }}, {{ p.lands | length }}</td>
 							<td>{{ p.money | money }}</td>
-							<td>{{ p.payout }}</td>
+							<td>{{ p.payout | money }}</td>
 						</tr>
 						{% endfor %}
 					</table>
 					{% if game.next_auction_time %}
-					<div class="panel-footer">Auction ends <span id="time"></span>
+					<div class="panel-footer">
+						Auction ends <span id="time"></span><br>
+						Total remaining payout: {{ game.remaining_payout | money }} 
 					</div>
 					{% endif %}
+				</div>
+				{% endif %}
+
+				{% if game.status == 'new' and player.player_number == 1 %}
+				<div class="panel panel-default">
+					<div class="panel-heading">Start Game</div>
+					<div class="panel-body">
+						<p>
+							Since you are the first player who joined this game, you can force the game to start immediately. The remaining {{ game.number_of_players - (players | length) }} player slots will be filled with AI players.
+						</p>
+						<form action="{{ player.id }}/start" method="POST">
+							<button type="submit" class="btn">Start Game Now</button>
+						</form>
+					</div>
 				</div>
 				{% endif %}
 			</div>
