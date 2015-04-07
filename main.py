@@ -127,9 +127,7 @@ class NewPlayer(BaseHandler):
         player = Player(self.request.get('name'), game)
         game.players.append(player)
         if len(game.players) == game.number_of_players:
-            game.status = 'in_progress'
-            game.next_auction_time = (
-                datetime.utcnow() + timedelta(hours=game.max_time))
+            game.start()
         game.put()
         self.session.add_flash('Joined successfully! Please bookmark this URL '
                                'to keep playing as this user.', 'success')
@@ -190,6 +188,16 @@ class ResolveAuction(BaseHandler):
         self.redirect("/game/%d/" % game.key.id())
 
 
+class StartGame(BaseHandler):
+
+    def post(self, game_id, player_id):
+        game, _ = get_game(game_id, None)
+        assert int(player_id) == game.players[0].id
+        game.start()
+        game.put()
+        self.redirect("/game/%d/%d" % (game.key.id(), player_id))
+
+
 class RedirectToGame(BaseHandler):
 
     def get(self, game_id):
@@ -201,6 +209,7 @@ application = webapp2.WSGIApplication([
     (r'/game/test', GamePage),
     (r'/new_game', NewGame, 'new_game'),
     (r'/game/(\d+)/(\d*)', ShowGame),
+    (r'/game/(\d+)/(\d+)/start', StartGame),
     (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
     (r'/game/(\d+)/resolve_auction', ResolveAuction),
