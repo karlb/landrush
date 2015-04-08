@@ -22,6 +22,7 @@ class Game(ndb.Model):
     status = ndb.TextProperty(default='new')
     turn = ndb.IntegerProperty(default=0)
     next_auction_time = ndb.DateTimeProperty()
+    allowed_missed_deadlines = ndb.IntegerProperty(default=2)
 
     @classmethod
     def new_game(cls, auction_size=3, start_money=1000, new_money=100,
@@ -73,7 +74,7 @@ class Game(ndb.Model):
                 or p.ai
                 or p.quit
                 for p in self.players
-            ):
+                ):
             # all players have placed bids
             return True
 
@@ -81,7 +82,6 @@ class Game(ndb.Model):
 
     @property
     def remaining_turns(self):
-        print '>>>', [l for l in self.board.lands if not l.owner]
         return math.ceil(
             len(
                 [l for l in self.board.lands if not l.owner]
@@ -95,22 +95,40 @@ class Game(ndb.Model):
         return (self.remaining_turns - 1) * self.new_money + self.final_payout
 
     def resolve_auction(self):
-        # ai players
+        # place bids for ai and missing players
         for p in self.players:
-            if p.ai:
+            if p.bids is None and not p.ai and not p.quit:
+                p.missed_deadlines += 1
+                times_left = self.allowed_missed_deadlines - p.missed_deadlines
+                if times_left == 0:
+                    p.ai = True
+                    message = (""" You have missed the auction deadline too
+                               often.  We don't need you, anymore. Be on time
+                               during your next game! """)
+                else:
+                    if times_left == 1:
+                        more_text = 'one more time'
+                    else:
+                        more_text = '%d more times' % times_left
+                    message = (""" You have missed the auction deadline, so
+                               your nephew placed some bids for you. If you do
+                               this %s, he will go on without you."""
+                               % more_text)
+                p.messages.append([message, 'danger'])
+            if p.ai or p.bids is None:
                 p.bids = ai.calculate_bids(self, p)
 
         # resolve auction
         self.state['last_auction'] = []
-        players = [p for p in self.players if p.bids is not None]
         for i in range(len(self.auction)):
             # reduce bids to available money
-            for p in players:
+            for p in self.players:
                 p.bids[i] = min(p.bids[i], p.money)
 
             # detect winner
-            bidding_players = sorted(players, key=lambda p: (-p.bids[i],
-                                                             randint(0, 1000)))
+            bidding_players = sorted(self.players,
+                                     key=lambda p: (-p.bids[i],
+                                                    randint(0, 1000)))
             if not bidding_players:
                 continue
             winner = bidding_players[0]
@@ -198,6 +216,8 @@ class Player():
         self.game_key = game.key
         self.ai = ai
         self.quit = False
+        self.missed_deadlines = 0
+        self.messages = []
 
     def update_connected_lands(self):
         if not self.lands:

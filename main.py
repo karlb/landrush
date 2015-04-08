@@ -101,8 +101,16 @@ class ShowGame(GamePage):
 
     def get(self, game_id, player_id=None):
         game, player = get_game(game_id, player_id)
+        game_changed = False
         if game.ready_for_auction:
             game.resolve_auction()
+            game_changed = True
+        if player and player.messages:
+            for m in player.messages:
+                self.session.add_flash(*m)
+            player.messages = []
+            game_changed = True
+        if game_changed:
             game.put()
         self.show_game(game, player)
 
