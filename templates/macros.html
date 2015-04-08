@@ -22,7 +22,7 @@
         {% else %}
             {% for f in form %}
                 {% if f.type == 'BooleanField' %}
-                    {{ render_checkbox_field(f) }}
+                    {{ render_field(f, **(f.description or {})) }}
                 {% elif f.type == 'RadioField' %}
                     {{ render_radio_field(f) }}
                 {% else %}
