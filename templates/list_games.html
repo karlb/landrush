@@ -1,0 +1,45 @@
+{% extends 'page.html' %}
+
+
+{% macro list_games(games) %}
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Players</th>
+				<th>Time Limit</th>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		{% for g in games %}
+		<tr>
+			<td>{{ g.name}}</td>
+			<td>{{ g.players | length}} / {{ g.number_of_players }}</td>
+			<td>{{ g.max_time }} h</td>
+			<td><a href="">View Game</a></td>
+			<td></td>
+		</tr>
+		{% else %}
+		<tr>
+			<td colspan="10">No public games</td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endmacro %}
+
+
+{% block main %}
+	<h1>Public Games</h1>
+	<h2>Waiting for more Players</h2>
+
+	{{ list_games(open_games)}}
+
+	<h2>In Progress</h2>
+
+	{{ list_games(games_in_progress)}}
+
+	<h2>Recently Finished</h2>
+
+	{{ list_games(finished_games)}}
+{% endblock %}

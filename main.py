@@ -149,6 +149,7 @@ class IndexPage(BaseHandler):
 
 class NewGameForm(wtforms.Form):
 
+    name = wtforms.StringField('Game name')
     players = wtforms.SelectField('Number of Players',
                                   choices=zip(range(2, 11), range(2, 11)),
                                   default=4, coerce=int)
@@ -167,6 +168,7 @@ class NewGameForm(wtforms.Form):
                                        (7 * 24, '1 week'),
                                    ],
                                    default=24, coerce=float)
+    public = wtforms.BooleanField('Show game in public games list')
 
 
 class NewGame(BaseHandler):
@@ -212,10 +214,22 @@ class RedirectToGame(BaseHandler):
         self.redirect("/game/%s/" % game_id)
 
 
+class ListGames(BaseHandler):
+
+    template = 'list_games.html'
+
+    def get(self):
+        self.template_vars['open_games'] = Game.query(Game.public == True, Game.status == 'new')
+        self.template_vars['games_in_progress'] = Game.query(Game.public == True, Game.status == 'in_progress')
+        self.template_vars['finished_games'] = Game.query(Game.public == True, Game.status == 'finished')
+        BaseHandler.get(self)
+
+
 application = webapp2.WSGIApplication([
     (r'/', IndexPage, 'index'),
     (r'/game/test', GamePage),
     (r'/new_game', NewGame, 'new_game'),
+    (r'/list_games', ListGames, 'list_games'),
     (r'/game/(\d+)/(\d*)', ShowGame),
     (r'/game/(\d+)/(\d+)/start', StartGame),
     (r'/game/(\d+)', RedirectToGame),

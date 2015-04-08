@@ -19,15 +19,17 @@ class Game(ndb.Model):
     new_money = ndb.FloatProperty()
     final_payout = ndb.FloatProperty()
     auction_type = ndb.TextProperty()
-    status = ndb.TextProperty(default='new')
+    status = ndb.StringProperty(default='new')
     turn = ndb.IntegerProperty(default=0)
     next_auction_time = ndb.DateTimeProperty()
     allowed_missed_deadlines = ndb.IntegerProperty(default=2)
+    public = ndb.BooleanProperty(default=False)
+    name = ndb.StringProperty()
 
     @classmethod
-    def new_game(cls, auction_size=3, start_money=1000, new_money=100,
+    def new_game(cls, name, auction_size=3, start_money=1000, new_money=100,
                  final_payout=500, auction_type='1st_price', players=2,
-                 max_time=24):
+                 max_time=24, public=False):
         board = Board(size=(8, 8))
         auction = sample(board.lands, auction_size)
         upcoming_auction = sample(board.lands - set(auction), auction_size)
@@ -46,6 +48,8 @@ class Game(ndb.Model):
             new_money=new_money,
             final_payout=final_payout,
             auction_type=auction_type,
+            public=public,
+            name=name,
         )
 
     @property
