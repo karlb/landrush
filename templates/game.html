@@ -166,7 +166,11 @@
 						</tr>
 						{% endfor %}
 					</table>
-					{% if game.next_auction_time %}
+					{% if game.remaining_turns == 0 %}
+					<div class="panel-footer">
+						{{ players[0].name }} has won the game!
+					</div>
+					{% elif game.next_auction_time %}
 					<div class="panel-footer">
 						Auction ends <span id="time"></span><br>
 						Total remaining payout: {{ game.remaining_payout | money }} 

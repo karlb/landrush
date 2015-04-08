@@ -86,6 +86,8 @@ class Game(ndb.Model):
 
     @property
     def remaining_payout(self):
+        if self.remaining_turns == 0:
+            return 0
         return (self.remaining_turns - 1) * self.new_money + self.final_payout
 
     def resolve_auction(self):
