@@ -68,8 +68,12 @@ class Game(ndb.Model):
         if self.status != 'in_progress':
             return False
 
-        if all((p.bids is not None) or p.ai
-               for p in self.players):
+        if all(
+                p.bids is not None
+                or p.ai
+                or p.quit
+                for p in self.players
+            ):
             # all players have placed bids
             return True
 
@@ -157,6 +161,8 @@ class Game(ndb.Model):
         for payout, player in zip(payouts, self.players):
             player.payout = round(payout * scaling)
             player.money += player.payout
+            if player.money == 0:
+                player.quit = True
 
     def start(self):
         self.status = 'in_progress'
@@ -191,6 +197,7 @@ class Player():
         self.connected_lands = 0
         self.game_key = game.key
         self.ai = ai
+        self.quit = False
 
     def update_connected_lands(self):
         if not self.lands:

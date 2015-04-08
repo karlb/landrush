@@ -155,11 +155,15 @@
 						{% for p in players %}
 						<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
 							<td class="finished">
-								{%- if p.ai%}AI
+								{%- if p.quit %}&mdash;
+								{%- elif p.ai %}AI
 								{%- elif p.bids %}✓
 								{%- endif -%}
 							</td>
-							<td class="background-p{{ p.player_number }}">{{ p.name }}</td>
+							<td class="background-p{{ p.player_number }}">
+								{%- if p.quit %}<s>{{ p.name }}</s>
+								{%- else %}{{ p.name }}{% endif -%}
+							</td>
 							<td>{{ p.connected_lands }}, {{ p.lands | length }}</td>
 							<td>{{ p.money | money }}</td>
 							<td>{{ p.payout | money }}</td>
@@ -172,7 +176,7 @@
 					</div>
 					{% elif game.next_auction_time %}
 					<div class="panel-footer">
-						Auction ends <span id="time"></span><br>
+						Auction ends <span id="time"></span>.<br>
 						Total remaining payout: {{ game.remaining_payout | money }} 
 					</div>
 					{% endif %}

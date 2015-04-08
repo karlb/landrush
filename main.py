@@ -195,7 +195,7 @@ class StartGame(BaseHandler):
         assert int(player_id) == game.players[0].id
         game.start()
         game.put()
-        self.redirect("/game/%d/%d" % (game.key.id(), player_id))
+        self.redirect("/game/%d/%s" % (game.key.id(), player_id))
 
 
 class RedirectToGame(BaseHandler):
