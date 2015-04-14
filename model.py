@@ -220,7 +220,7 @@ def flatten(listOfLists):
     return chain.from_iterable(listOfLists)
 
 
-class Player():
+class Player(object):
     #name = ndb.TextProperty()
     #money = ndb.FloatProperty()
     #bids = ndb.FloatProperty(repeated=True)

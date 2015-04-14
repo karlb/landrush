@@ -172,7 +172,7 @@
 					</table>
 					{% if game.remaining_turns == 0 %}
 					<div class="panel-footer">
-						{{ players[0].name }} has won the game!
+						{{ (players | sort(attribute='money', reverse=True) | first).name }} has won the game!
 					</div>
 					{% elif game.next_auction_time %}
 					<div class="panel-footer">
