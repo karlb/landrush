@@ -17,7 +17,7 @@
 			<td>{{ g.name}}</td>
 			<td>{{ g.players | length}} / {{ g.number_of_players }}</td>
 			<td>{{ g.max_time }} h</td>
-			<td><a href="">View Game</a></td>
+			<td><a href="{{ g.url() }}">View Game</a></td>
 			<td></td>
 		</tr>
 		{% else %}

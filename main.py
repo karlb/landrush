@@ -31,6 +31,8 @@ class BaseHandler(webapp2.RequestHandler):
     def __init__(self, *args, **kwargs):
         self.template_vars = {
             'handler': self,
+            'uri_for': lambda name, *args, **kwargs: \
+                webapp2.uri_for(name, self.request, *args, **kwargs),
         }
         webapp2.RequestHandler.__init__(self, *args, **kwargs)
 
@@ -186,7 +188,7 @@ class NewGame(BaseHandler):
         self.session.add_flash(
             'Game created succesfully! Please send the current URL to other '
             'people to allow them to join the game.', 'success')
-        self.redirect("/game/%d/" % game.key.id())
+        self.redirect(game.url())
 
 
 class ResolveAuction(BaseHandler):
@@ -230,7 +232,7 @@ application = webapp2.WSGIApplication([
     (r'/game/test', GamePage),
     (r'/new_game', NewGame, 'new_game'),
     (r'/list_games', ListGames, 'list_games'),
-    (r'/game/(\d+)/(\d*)', ShowGame),
+    webapp2.Route(r'/game/<:\d+>/<:\d*>', ShowGame, 'game'),
     (r'/game/(\d+)/(\d+)/start', StartGame),
     (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
