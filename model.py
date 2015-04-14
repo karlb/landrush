@@ -1,9 +1,11 @@
 from __future__ import division
 import math
+import os
 from random import sample, randint
 from itertools import chain
 from datetime import datetime, timedelta
 
+import webapp2
 from google.appengine.ext import ndb
 
 import ai
@@ -25,6 +27,7 @@ class Game(ndb.Model):
     allowed_missed_deadlines = ndb.IntegerProperty(default=2)
     public = ndb.BooleanProperty(default=False)
     name = ndb.StringProperty()
+    version = ndb.StringProperty(default='1')
 
     @classmethod
     def new_game(cls, name, auction_size=3, start_money=1000, new_money=100,
@@ -50,6 +53,7 @@ class Game(ndb.Model):
             auction_type=auction_type,
             public=public,
             name=name,
+            version=os.environ['CURRENT_VERSION_ID'].split('.')[0]
         )
 
     @property
@@ -170,6 +174,21 @@ class Game(ndb.Model):
 
         self.distribute_money()
         self.turn += 1
+
+    def url(self, player_id=''):
+        """ Return the url for the game including the versioned hostname to
+            keep old games running when deploying incompatible new releases.
+        """
+        req = webapp2.get_request()
+        for k, v in os.environ.items():
+            print k, v
+        if os.environ['SERVER_NAME'] == 'localhost':
+            netloc = os.environ['DEFAULT_VERSION_HOSTNAME']
+        else:
+            netloc = self.version + '.' + os.environ['DEFAULT_VERSION_HOSTNAME']
+        uri = webapp2.uri_for('game', req, *(self.key.id(), player_id),
+                              _full=True, _netloc=netloc)
+        return uri
 
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
