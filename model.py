@@ -180,15 +180,14 @@ class Game(ndb.Model):
             keep old games running when deploying incompatible new releases.
         """
         req = webapp2.get_request()
-        for k, v in os.environ.items():
-            print k, v
         if os.environ['SERVER_NAME'] == 'localhost':
             netloc = os.environ['DEFAULT_VERSION_HOSTNAME']
         else:
-            netloc = self.version + '.' + os.environ['DEFAULT_VERSION_HOSTNAME']
+            hostname = os.environ['DEFAULT_VERSION_HOSTNAME']
+            netloc = self.version + '.' + hostname
         uri = webapp2.uri_for('game', req, *(self.key.id(), player_id),
                               _full=True, _netloc=netloc)
-        return uri
+        return str(uri)
 
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
