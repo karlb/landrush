@@ -77,11 +77,11 @@ class GamePage(BaseHandler):
         BaseHandler.get(self)
 
 
-def get_game(game_id, player_id):
+def get_game(game_id, player_secret):
     game = ndb.Key(Game, int(game_id)).get()
     assert game
-    if player_id:
-        player = [p for p in game.players if p.id == int(player_id)][0]
+    if player_secret:
+        player = [p for p in game.players if p.secret == int(player_secret)][0]
     else:
         player = None
     return game, player
@@ -104,14 +104,30 @@ class ShowGame(GamePage):
     def get(self, game_id, player_id=None):
         game, player = get_game(game_id, player_id)
         game_changed = False
+
+        # redirect to player page if cookie is present
+        cookie_secret = self.request.cookies.get('game-%s' % game_id)
+        if not player and cookie_secret:
+            return self.redirect(game.url(player_secret=cookie_secret))
+
+        # trigger auction
         if game.ready_for_auction:
             game.resolve_auction()
             game_changed = True
+
+        # show queued messages
         if player and player.messages:
             for m in player.messages:
                 self.session.add_flash(*m)
             player.messages = []
             game_changed = True
+
+        # set cookie
+        if player:
+            self.response.set_cookie('game-%s' % game_id, str(player.secret),
+                                expires=datetime.now() + timedelta(days=300),
+                                domain=os.environ['DEFAULT_VERSION_HOSTNAME'])
+
         if game_changed:
             game.put()
         self.show_game(game, player)
@@ -140,8 +156,9 @@ class NewPlayer(BaseHandler):
             game.start()
         game.put()
         self.session.add_flash('Joined successfully! Please bookmark this URL '
-                               'to keep playing as this user.', 'success')
-        self.redirect("/game/%d/%s" % (game.key.id(), player.id))
+                               'if you want to continue playing on a '
+                               'different device.', 'success')
+        self.redirect("/game/%d/%s" % (game.key.id(), player.secret))
 
 
 class IndexPage(BaseHandler):

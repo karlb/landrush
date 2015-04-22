@@ -175,7 +175,7 @@ class Game(ndb.Model):
         self.distribute_money()
         self.turn += 1
 
-    def url(self, player_id=''):
+    def url(self, player_secret=''):
         """ Return the url for the game including the versioned hostname to
             keep old games running when deploying incompatible new releases.
         """
@@ -185,7 +185,7 @@ class Game(ndb.Model):
         else:
             hostname = os.environ['DEFAULT_VERSION_HOSTNAME']
             netloc = self.version + '.' + hostname
-        uri = webapp2.uri_for('game', req, *(self.key.id(), player_id),
+        uri = webapp2.uri_for('game', req, *(self.key.id(), player_secret),
                               _full=True, _netloc=netloc)
         return str(uri)
 
@@ -233,6 +233,7 @@ class Player(object):
         self.money = game.start_money
         self.bids = None
         self.id = randint(1, 10000000)
+        self.secret = randint(1, 1000000000)
         self.player_number = len(game.players) + 1
         self.connected_lands = 0
         self.game_key = game.key
