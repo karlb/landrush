@@ -194,7 +194,7 @@
 						<p>
 							Since you are the first player who joined this game, you can force the game to start immediately. The remaining {{ game.number_of_players - (players | length) }} player slots will be filled with AI players.
 						</p>
-						<form action="{{ player.id }}/start" method="POST">
+						<form action="{{ player.secret }}/start" method="POST">
 							<button type="submit" class="btn">Start Game Now</button>
 						</form>
 					</div>
