@@ -131,18 +131,38 @@
 				{% if not player %}
 				<div class="player_info">
 					{% if game.status == 'new' %}
-						<h3>Join Game:</h3>
-						<form action="new_player" method="POST">
-							Player Name: <input name="name">
-							<br>
-							<button class="btn btn-primary">Join</button>
-						</form>
+						<div class="panel panel-default">
+							<div class="panel-heading">Join Game</div>
+							<div class="panel-body">
+								<p>
+									The game has not started, yet. Just enter your name and join the fun!
+								</p>
+								<form action="new_player" method="POST" class="form-inline">
+									<div class="form-group">
+										<label>Name</label>
+										<input class="form-control input-sm" name="name">
+										<button class="btn btn-primary">Join</button>
+									</div>
+								</form>
+							</div>
+						</div>
 					{% else %}
 						<div class="well">
 							The game is already in progress, so no new players are allowed.
 						</div>
 					{% endif %}
 				</div>
+				{% endif %}
+
+				{% if game.turn == 0 %}
+					<div class="panel panel-default">
+						<div class="panel-heading">Rules</div>
+						<div class="panel-body">
+							<p>
+							Each turn, {{ game.new_money }} will be distributed among the players. The player with the highest number of connected regions gets {{ game.payouts[0] }}, the next players get {{ game.payouts[1:] | join(', ') }}. When all regions are sold, a final payout of {{ game.final_payout }} will be distributed.
+							</p>
+						</div>
+					</div>
 				{% endif %}
 
 				{% if players %}
@@ -177,6 +197,10 @@
 					{% if game.remaining_turns == 0 %}
 					<div class="panel-footer">
 						{{ (players | sort(attribute='money', reverse=True) | first).name }} has won the game!
+					</div>
+					{% elif game.status == 'new' %}
+					<div class="panel-footer">
+						Waiting for {{ game.number_of_players - (game.players | length) }} more players to join.
 					</div>
 					{% elif game.next_auction_time %}
 					<div class="panel-footer">

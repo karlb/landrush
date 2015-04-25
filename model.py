@@ -18,10 +18,10 @@ class Game(ndb.Model):
     number_of_players = ndb.IntegerProperty()
     max_time = ndb.FloatProperty()
     auction_size = ndb.IntegerProperty()
-    start_money = ndb.FloatProperty()
-    new_money = ndb.FloatProperty()
+    start_money = ndb.IntegerProperty()
+    new_money = ndb.IntegerProperty()
     payout_exponent = ndb.FloatProperty(default=2)
-    final_payout = ndb.FloatProperty()
+    final_payout = ndb.IntegerProperty()
     auction_type = ndb.TextProperty()
     status = ndb.StringProperty(default='new')
     turn = ndb.IntegerProperty(default=0)
@@ -197,18 +197,22 @@ class Game(ndb.Model):
                               _full=True, _netloc=netloc)
         return str(uri)
 
-    def distribute_money(self):
-        self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
-                                         p.money, randint(0, 1000)))
+    @property
+    def payouts(self):
         payouts = [p ** self.payout_exponent
-                   for p in reversed(range(len(self.players)))]
+                   for p in reversed(range(self.number_of_players))]
         total_payout = self.new_money
         if not self.auction:
             self.status = 'finished'
             total_payout = self.final_payout
         scaling = total_payout / sum(payouts)
-        for payout, player in zip(payouts, self.players):
-            player.payout = round(payout * scaling)
+        return [int(round(pay * scaling)) for pay in payouts]
+
+    def distribute_money(self):
+        self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
+                                         p.money, randint(0, 1000)))
+        for payout, player in zip(self.payouts, self.players):
+            player.payout = payout
             player.money += player.payout
             if player.money == 0:
                 player.quit = True
