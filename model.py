@@ -33,7 +33,7 @@ class Game(ndb.Model):
 
     @classmethod
     def new_game(cls, name, start_money=1000,
-                 final_payout=500, auction_type='1st_price', players=2,
+                 auction_type='1st_price', players=2,
                  max_time=24, public=False):
         auction_size = 3 + (players - 2) // 3
         x_size = 9
@@ -42,6 +42,7 @@ class Game(ndb.Model):
                       joins=int(x_size * y_size * 0.4))
         auction = sample(board.lands, auction_size)
         new_money = 25 * players
+        final_payout = new_money * 5
         upcoming_auction = sample(board.lands - set(auction), auction_size)
         return cls(
             state=dict(
