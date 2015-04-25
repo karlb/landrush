@@ -199,7 +199,7 @@ class Game(ndb.Model):
 
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
-                                         -p.money, randint(0, 1000)))
+                                         p.money, randint(0, 1000)))
         payouts = [p ** self.payout_exponent
                    for p in reversed(range(len(self.players)))]
         total_payout = self.new_money
