@@ -20,6 +20,7 @@ class Game(ndb.Model):
     auction_size = ndb.IntegerProperty()
     start_money = ndb.FloatProperty()
     new_money = ndb.FloatProperty()
+    payout_exponent = ndb.FloatProperty(default=2)
     final_payout = ndb.FloatProperty()
     auction_type = ndb.TextProperty()
     status = ndb.StringProperty(default='new')
@@ -194,7 +195,8 @@ class Game(ndb.Model):
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
                                          -p.money, randint(0, 1000)))
-        payouts = list(reversed(range(len(self.players))))
+        payouts = [p ** self.payout_exponent
+                   for p in reversed(range(len(self.players)))]
         total_payout = self.new_money
         if not self.auction:
             self.status = 'finished'
