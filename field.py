@@ -63,6 +63,9 @@ class Land():
         self.id = 'land-%d-%d' % sorted(self.fields)[0].index
         self.owner = None
 
+    def __repr__(self):
+        return repr(self.fields)
+
     def add_field(self, field):
         self.fields.append(field)
         if field.land:
@@ -77,19 +80,19 @@ class Land():
 
 class Board():
 
-    def __init__(self, size=(10, 10)):
+    def __init__(self, size=(10, 10), joins=20):
         self.size = size
         self.all_indexes = set(product(range(self.size[0]), range(self.size[1])))
         self.fields = np.array([
-            [Field(self, (x, y)) for y in range(size[0])]
-            for x in range(size[1])])
+            [Field(self, (x, y)) for y in range(size[1])]
+            for x in range(size[0])])
 
         for field in self:
             Land(self, [field])
 
         self.calc_neighbors()
 
-        for i in range(27):
+        for i in range(joins):
             land = choice(list(self.lands))
             joined_land = choice(list(land.neighbors))
             land.add_land(joined_land)
@@ -118,14 +121,14 @@ class Board():
             assert land.neighbors
 
     def show(self):
-        for row in self.fields:
+        for row in self.rows:
             print row
 
     @property
     def rows(self):
-        return np.transpose(self.fields)
+        return self.fields.transpose()
 
 
 
-#b = Board()
+#b = Board((3,2))
 #b.show()
