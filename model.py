@@ -32,11 +32,16 @@ class Game(ndb.Model):
     version = ndb.StringProperty(default='1')
 
     @classmethod
-    def new_game(cls, name, auction_size=3, start_money=1000, new_money=100,
+    def new_game(cls, name, start_money=1000,
                  final_payout=500, auction_type='1st_price', players=2,
                  max_time=24, public=False):
-        board = Board(size=(8, 8))
+        auction_size = 3 + (players - 2) // 3
+        x_size = 9
+        y_size = int(round(auction_size * 2.3))
+        board = Board(size=(x_size, y_size),
+                      joins=int(x_size * y_size * 0.4))
         auction = sample(board.lands, auction_size)
+        new_money = 25 * players
         upcoming_auction = sample(board.lands - set(auction), auction_size)
         return cls(
             state=dict(
