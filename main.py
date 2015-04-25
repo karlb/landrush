@@ -70,7 +70,7 @@ class GamePage(BaseHandler):
     template = 'game.html'
 
     def get(self):
-        self.show_game(Game.new_game(), None)
+        self.show_game(Game.new_game('test'), None)
 
     def show_game(self, game, player):
         self.template_vars.update(dict(players=game.players, player=player, game=game))
