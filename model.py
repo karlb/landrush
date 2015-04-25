@@ -9,6 +9,7 @@ import webapp2
 from google.appengine.ext import ndb
 
 import ai
+import mail
 from field import Board
 
 
@@ -174,6 +175,7 @@ class Game(ndb.Model):
 
         self.distribute_money()
         self.turn += 1
+        mail.turn_finished(self)
 
     def url(self, player_secret=''):
         """ Return the url for the game including the versioned hostname to

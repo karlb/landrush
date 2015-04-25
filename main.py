@@ -147,7 +147,7 @@ class ShowGame(GamePage):
             game.resolve_auction()
         send_updates(game, player)
         game.put()
-        self.redirect("/game/%d/%s" % (game.key.id(), player.id))
+        self.redirect("/game/%d/%s" % (game.key.id(), player.secret))
 
 
 class NewPlayer(BaseHandler):
