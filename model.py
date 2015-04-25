@@ -241,6 +241,8 @@ class Player(object):
         self.quit = False
         self.missed_deadlines = 0
         self.messages = []
+        self.email = ''
+        self.notify = 'turn'
 
     def update_connected_lands(self):
         if not self.lands:

@@ -57,6 +57,14 @@ class BaseHandler(webapp2.RequestHandler):
         # Returns a session using the default cookie key.
         return self.session_store.get_session()
 
+    def set_cookie(self, key, value):
+        domain = os.environ['DEFAULT_VERSION_HOSTNAME']
+        if 'localhost' in domain:
+            domain = None
+        self.response.set_cookie(key, value,
+                            expires=datetime.now() + timedelta(days=300),
+                            domain=domain)
+
 
 class GamePage(BaseHandler):
     template = 'game.html'
@@ -124,9 +132,7 @@ class ShowGame(GamePage):
 
         # set cookie
         if player:
-            self.response.set_cookie('game-%s' % game_id, str(player.secret),
-                                expires=datetime.now() + timedelta(days=300),
-                                domain=os.environ['DEFAULT_VERSION_HOSTNAME'])
+            self.set_cookie('game-%s' % game_id, str(player.secret))
 
         if game_changed:
             game.put()
@@ -151,6 +157,9 @@ class NewPlayer(BaseHandler):
         assert game
 
         player = Player(self.request.get('name'), game)
+        notify_defaults = self.request.cookies.get('notify-defaults')
+        if notify_defaults:
+            player.email, player.notify = notify_defaults.split('|')
         game.players.append(player)
         if len(game.players) == game.number_of_players:
             game.start()
@@ -219,12 +228,30 @@ class ResolveAuction(BaseHandler):
 
 class StartGame(BaseHandler):
 
-    def post(self, game_id, player_id):
+    def post(self, game_id, player_secret):
         game, _ = get_game(game_id, None)
-        assert int(player_id) == game.players[0].id
+        assert int(player_secret) == game.players[0].secret
         game.start()
         game.put()
-        self.redirect("/game/%d/%s" % (game.key.id(), player_id))
+        self.redirect(game.url(player_secret))
+
+
+class Notifications(BaseHandler):
+
+    def post(self, game_id, player_secret):
+        game, player = get_game(game_id, player_secret)
+
+        # change settings
+        player.email = self.request.POST['email']
+        player.notify = self.request.POST['when']
+        game.put()
+
+        # change defaults in cookie
+        defaults = '%s|%s' % (player.email, player.notify)
+        self.set_cookie('notify-defaults', defaults)
+        self.session.add_flash('Notification settings changed successfully',
+                               'success')
+        self.redirect(game.url(player_secret))
 
 
 class RedirectToGame(BaseHandler):
@@ -251,6 +278,7 @@ application = webapp2.WSGIApplication([
     (r'/list_games', ListGames, 'list_games'),
     webapp2.Route(r'/game/<:\d+>/<:\d*>', ShowGame, 'game'),
     (r'/game/(\d+)/(\d+)/start', StartGame),
+    (r'/game/(\d+)/(\d+)/notifications', Notifications),
     (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
     (r'/game/(\d+)/resolve_auction', ResolveAuction),
