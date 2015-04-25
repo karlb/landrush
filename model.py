@@ -91,11 +91,11 @@ class Game(ndb.Model):
 
     @property
     def remaining_turns(self):
-        return math.ceil(
+        return int(math.ceil(
             len(
                 [l for l in self.board.lands if not l.owner]
             ) / self.auction_size
-        )
+        ))
 
     @property
     def remaining_payout(self):
