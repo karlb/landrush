@@ -200,6 +200,35 @@
 					</div>
 				</div>
 				{% endif %}
+
+				{% if player %}
+				<div class="panel panel-default">
+					<div class="panel-heading">Notifications</div>
+					<div class="panel-body">
+						<p>
+						</p>
+						<form action="{{ player.secret }}/notifications" method="POST" class="form-horizontal">
+							<div class="form-group">
+								<label class="col-xs-3 control-label">E-Mail</label>
+								<div class="col-xs-9">
+									<input type="email" required class="form-control input-sm" name="email" value="{{ player.email }}">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-xs-3 control-label">When</label>
+								<div class="col-xs-9">
+									<select name="when" class="form-control">
+										{% for value, label in [('turn', 'after each turn'), ('off', 'never')] %}
+										<option {{ 'selected' if player.notify == value }} value="{{ value }}">{{ label }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<button type="submit" class="btn">Save</button>
+						</form>
+					</div>
+				</div>
+				{% endif %}
 			</div>
 		</div>
 	</div>
