@@ -115,7 +115,7 @@ class ShowGame(GamePage):
 
         # redirect to player page if cookie is present
         cookie_secret = self.request.cookies.get('game-%s' % game_id)
-        if not player and cookie_secret:
+        if not player and cookie_secret in [p.secret for p in game.players]:
             return self.redirect(game.url(player_secret=cookie_secret))
 
         # trigger auction
