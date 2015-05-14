@@ -11,6 +11,7 @@ from google.appengine.api import channel
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
 from webapp2_extras import sessions
 import wtforms
+import numpy
 
 from view import jinja_filters
 from model import Game, Player
@@ -109,14 +110,8 @@ def send_updates(game, player):
 
 class ShowGame(GamePage):
 
-    def get(self, game_id, player_id=None):
-        game, player = get_game(game_id, player_id)
+    def check_for_changes(self, game, player):
         game_changed = False
-
-        # redirect to player page if cookie is present
-        cookie_secret = self.request.cookies.get('game-%s' % game_id)
-        if not player and cookie_secret in [p.secret for p in game.players]:
-            return self.redirect(game.url(player_secret=cookie_secret))
 
         # trigger auction
         if game.ready_for_auction:
@@ -130,12 +125,23 @@ class ShowGame(GamePage):
             player.messages = []
             game_changed = True
 
+        if game_changed:
+            game.put()
+
+    def get(self, game_id, player_id=None):
+        game, player = get_game(game_id, player_id)
+
+        # redirect to player page if cookie is present
+        cookie_secret = self.request.cookies.get('game-%s' % game_id)
+        if not player and cookie_secret in [p.secret for p in game.players]:
+            return self.redirect(game.url(player_secret=cookie_secret))
+
+        self.check_for_changes(game, player)
+
         # set cookie
         if player:
             self.set_cookie('game-%s' % game_id, str(player.secret))
 
-        if game_changed:
-            game.put()
         self.show_game(game, player)
 
     def post(self, game_id, player_id):
@@ -148,6 +154,26 @@ class ShowGame(GamePage):
         send_updates(game, player)
         game.put()
         self.redirect("/game/%d/%s" % (game.key.id(), player.secret))
+
+
+def dumper(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    if isinstance(obj, numpy.ndarray):
+        return obj.tolist()
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
+    return obj.__dict__
+
+
+class JSONGame(ShowGame):
+
+    def get(self, game_id, player_id=None):
+        game, player = get_game(game_id, player_id)
+        self.check_for_changes(game, player)
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(json.dumps(game, default=dumper,
+                                       sort_keys=True, indent=4))
 
 
 class NewPlayer(BaseHandler):
@@ -279,6 +305,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route(r'/game/<:\d+>/<:\d*>', ShowGame, 'game'),
     (r'/game/(\d+)/(\d+)/start', StartGame),
     (r'/game/(\d+)/(\d+)/notifications', Notifications),
+    (r'/game/(\d+)/(\d+)/json', JSONGame),
     (r'/game/(\d+)', RedirectToGame),
     (r'/game/(\d+)/new_player', NewPlayer),
     (r'/game/(\d+)/resolve_auction', ResolveAuction),

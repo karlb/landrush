@@ -21,6 +21,11 @@ class Field():
     def __repr__(self):
         return repr(self.index)
 
+    def to_json(self):
+        return dict(
+            land=self.land.id
+        )
+
     def classes(self):
         ret_vals = []
 
@@ -66,6 +71,15 @@ class Land():
     def __repr__(self):
         return repr(self.fields)
 
+    def to_json(self):
+        d = dict(
+            id=self.id,
+            color=self.color,
+        )
+        if self.owner:
+            d['owner'] = self.owner.id
+        return d
+
     def add_field(self, field):
         self.fields.append(field)
         if field.land:
@@ -82,7 +96,8 @@ class Board():
 
     def __init__(self, size=(10, 10), joins=20):
         self.size = size
-        self.all_indexes = set(product(range(self.size[0]), range(self.size[1])))
+        self.all_indexes = set(
+                product(range(self.size[0]), range(self.size[1])))
         self.fields = np.array([
             [Field(self, (x, y)) for y in range(size[1])]
             for x in range(size[0])])
@@ -101,11 +116,19 @@ class Board():
     def __iter__(self):
         return chain(*self.fields)
 
+    def to_json(self):
+        return dict(
+            fields=self.fields,
+            lands=self.lands,
+        )
+
     def calc_neighbors(self):
         # fields
         for index in self.all_indexes:
-            possible_indexes = set((index[0] + o[0], index[1] + o[1])
-                                   for o in offsets.values()) & self.all_indexes
+            possible_indexes = set(
+                    (index[0] + o[0], index[1] + o[1])
+                    for o in offsets.values()
+                ) & self.all_indexes
             neighbors = []
             for p in possible_indexes:
                 neighbors.append(self.fields[p])
