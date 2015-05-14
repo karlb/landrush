@@ -74,13 +74,18 @@ class GamePage(BaseHandler):
         self.show_game(Game.new_game('test'), None)
 
     def show_game(self, game, player):
-        self.template_vars.update(dict(players=game.players, player=player, game=game))
+        # sort players by money if game has finished
+        if game.status == 'finished':
+            game.players.sort(key=lambda p: -p.money)
+        self.template_vars.update(dict(players=game.players,
+                                       player=player, game=game))
         self.template_vars.update(game.state)
         self.template_vars['len'] = len
         if player:
             client_id = '%d/%d' % (game.key.id(), player.id)
             try:
-                self.template_vars['channel_token'] = channel.create_channel(client_id)
+                self.template_vars['channel_token'] \
+                        = channel.create_channel(client_id)
             except OverQuotaError:
                 pass
         BaseHandler.get(self)
