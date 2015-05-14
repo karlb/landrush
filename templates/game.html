@@ -179,7 +179,8 @@
 						{% for p in players %}
 						<tr data-player_id="{{ p.id }}" {% if p == player %}class="active_player"{% endif %}>
 							<td class="finished">
-								{%- if p.quit %}&mdash;
+								{%- if game.status == 'finished' %}{{ loop.index }}.
+								{%- elif p.quit %}&mdash;
 								{%- elif p.ai %}AI
 								{%- elif p.bids %}✓
 								{%- endif -%}
