@@ -64,6 +64,25 @@ class Game(ndb.Model):
             version=os.environ['CURRENT_VERSION_ID'].split('.')[0]
         )
 
+    def to_json(self):
+        return dict(
+            name=self.name,
+            pulic=self.public,
+            max_time=self.max_time,
+            number_of_players=self.number_of_players,
+            auction_size=self.auction_size,
+            start_money=self.start_money,
+            final_payout=self.final_payout,
+            players=self.players,
+            board=self.board,
+            state=self.state,
+            auctions=dict(
+                current=self.auction,
+                upcoming=self.upcoming_auction,
+                last=self.state['last_auction'],
+            )
+        )
+
     @property
     def board(self):
         return self.state['board']
@@ -257,6 +276,13 @@ class Player(object):
         self.messages = []
         self.email = ''
         self.notify = 'turn'
+
+    def to_json(self):
+        return dict(
+            (key, getattr(self, key))
+            for key in 'name money bids connected_lands ai missed_deadlines '
+                'messages email notify id'.split(' ')
+        )
 
     def update_connected_lands(self):
         if not self.lands:
