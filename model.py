@@ -297,9 +297,8 @@ class Player(object):
                 'messages email notify id'.split(' ')
         )
 
-    def update_connected_lands(self):
-        if not self.lands:
-            return
+    def islands(self):
+        """Islands are a set of connected lands"""
         last_islands = None
         islands = {frozenset([l]) for l in self.lands}
         while islands != last_islands:
@@ -310,7 +309,12 @@ class Player(object):
                         land.neighbors.union({land}) for land in i
                     ) if l.owner and l.owner.id == self.id
                 ) for i in islands}
-        self.connected_lands = max(len(i) for i in islands)
+        return islands
+
+    def update_connected_lands(self):
+        if not self.lands:
+            return
+        self.connected_lands = max(len(i) for i in self.islands())
 
     @property
     def lands(self):
