@@ -30,25 +30,24 @@ class Game(ndb.Model):
     public = ndb.BooleanProperty(default=False)
     name = ndb.StringProperty()
     version = ndb.StringProperty(default='1')
+    auction_order = ndb.StringProperty(default='random')
 
     @classmethod
     def new_game(cls, name, start_money=1000,
                  auction_type='1st_price', players=2,
-                 max_time=24, public=False):
+                 max_time=24, public=False, auction_order='random'):
         auction_size = 3 + (players - 2) // 3
         x_size = 9
         y_size = int(round(auction_size * 2.3))
         board = Board(size=(x_size, y_size),
                       joins=int(x_size * y_size * 0.4))
-        auction = sample(board.lands, auction_size)
         new_money = 25 * players
         final_payout = new_money * 5
-        upcoming_auction = sample(board.lands - set(auction), auction_size)
-        return cls(
+        self = cls(
             state=dict(
                 board=board,
-                auction=auction,
-                upcoming_auction=upcoming_auction,
+                auction=[],
+                upcoming_auction=[],
                 last_auction=[],
                 players=[],
             ),
@@ -61,8 +60,12 @@ class Game(ndb.Model):
             auction_type=auction_type,
             public=public,
             name=name,
+            auction_order=auction_order,
             version=os.environ['CURRENT_VERSION_ID'].split('.')[0]
         )
+        self.state['auction'] = self.make_auction()
+        self.state['upcoming_auction'] = self.make_auction()
+        return self
 
     def to_json(self):
         return dict(
@@ -187,11 +190,7 @@ class Game(ndb.Model):
 
         # prepare next auction
         self.state['auction'] = self.upcoming_auction
-        free_lands = {l for l in self.board.lands
-                      if not l.owner} - set(self.auction)
-        self.state['upcoming_auction'] = sample(free_lands,
-                                                min(self.auction_size,
-                                                    len(free_lands)))
+        self.state['upcoming_auction'] = self.make_auction()
         self.next_auction_time = (
             datetime.utcnow() + timedelta(hours=self.max_time))
 
@@ -202,6 +201,20 @@ class Game(ndb.Model):
         self.distribute_money()
         self.turn += 1
         mail.turn_finished(self)
+
+    def make_auction(self):
+        free_lands = {l for l in self.board.lands
+                      if not l.owner} - set(self.auction)
+        if self.auction_order == 'random':
+            return sample(free_lands,
+                          min(self.auction_size,
+                              len(free_lands)))
+        if self.auction_order == 'go_west':
+            # rightmost lands first
+            eastern_lands = sorted(
+                free_lands, key=lambda l: -max(f.index[0] for f in l.fields))
+            return eastern_lands[:self.auction_size]
+        raise Exception('Unknown auction_order %r' % self.auction_order)
 
     def url(self, player_secret=''):
         """ Return the url for the game including the versioned hostname to

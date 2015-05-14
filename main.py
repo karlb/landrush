@@ -222,6 +222,12 @@ class NewGameForm(wtforms.Form):
                                        (7 * 24, '1 week'),
                                    ],
                                    default=24, coerce=float)
+    auction_order = wtforms.SelectField('Field Auction Order',
+                                        choices=[
+                                            ('random', 'Random'),
+                                            ('go_west', 'Go West!'),
+                                        ],
+                                        default='random')
     public = wtforms.BooleanField('Show game in public games list')
 
 
