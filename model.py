@@ -78,12 +78,13 @@ class Game(ndb.Model):
             final_payout=self.final_payout,
             players=self.players,
             board=self.board,
-            state=self.state,
             auctions=dict(
                 current=self.auction,
                 upcoming=self.upcoming_auction,
                 last=self.state['last_auction'],
-            )
+            ),
+            status=self.status,
+            turn=self.turn,
         )
 
     @property
@@ -294,7 +295,7 @@ class Player(object):
         return dict(
             (key, getattr(self, key))
             for key in 'name money bids connected_lands ai missed_deadlines '
-                'messages email notify id'.split(' ')
+                'messages email notify id player_number'.split(' ')
         )
 
     def islands(self):
