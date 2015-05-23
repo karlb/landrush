@@ -48,6 +48,13 @@
 					update_auction_end();
 				}, 5000);
 			{% endif %}
+
+			// Focus first auction if visible
+			// Used instead of the autofocus attribute to avoid scrolling down on small devices
+			var screen_height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+			if ($('#first-auction').offset().top + $('#first-auction').height() + 10 < screen_height) {
+				$('#first-auction').focus();
+			}
 		});
 	</script>
 {% endblock %}
@@ -111,7 +118,7 @@
 								<label class="col-xs-2 control-label">{{ loop.index }}</label>
 								<div class="col-xs-10">
 									<input type="number" data-land="{{ land.id }}"
-										{% if loop.index0 == 0 %}autofocus{% endif %}
+										{% if loop.index0 == 0 %}id="first-auction"{% endif %}
 										required min="0" max="{{player.money}}"
 										class="form-control input-sm"
 										name="bid" value="{{ player.bids[loop.index0] | money }}">
