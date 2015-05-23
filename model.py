@@ -187,6 +187,7 @@ class Game(ndb.Model):
 
         # clear bids
         for p in self.players:
+            p.last_bid_sum = sum(p.bids)
             p.bids = None
 
         # prepare next auction
@@ -235,6 +236,8 @@ class Game(ndb.Model):
     def payouts(self):
         payouts = [p ** self.payout_exponent
                    for p in reversed(range(self.number_of_players))]
+        # penalize last player (especially when playing with many players)
+        payouts[-1] -= max((self.number_of_players - 2) / 2, 0)
         total_payout = self.new_money
         if not self.auction:
             self.status = 'finished'
@@ -244,7 +247,8 @@ class Game(ndb.Model):
 
     def distribute_money(self):
         self.players.sort(key=lambda p: (-p.connected_lands, -len(p.lands),
-                                         p.money, randint(0, 1000)))
+                                         -p.last_bid_sum, p.money,
+                                         randint(0, 1000)))
         for payout, player in zip(self.payouts, self.players):
             player.payout = payout
             player.money += player.payout
