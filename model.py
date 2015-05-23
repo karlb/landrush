@@ -1,7 +1,7 @@
 from __future__ import division
 import math
 import os
-from random import sample, randint
+from random import shuffle, randint
 from itertools import chain
 from datetime import datetime, timedelta
 
@@ -204,18 +204,18 @@ class Game(ndb.Model):
         mail.turn_finished(self)
 
     def make_auction(self):
-        free_lands = {l for l in self.board.lands
-                      if not l.owner} - set(self.auction)
-        if self.auction_order == 'random':
-            return sample(free_lands,
-                          min(self.auction_size,
-                              len(free_lands)))
-        if self.auction_order == 'go_west':
-            # rightmost lands first
-            eastern_lands = sorted(
-                free_lands, key=lambda l: -max(f.index[0] for f in l.fields))
-            return eastern_lands[:self.auction_size]
-        raise Exception('Unknown auction_order %r' % self.auction_order)
+        free_lands = list(
+            {l for l in self.board.lands if not l.owner} - set(self.auction)
+        )
+        shuffle(free_lands)
+        sort_order = {
+            'random': lambda l: 0,
+            'go_west': lambda l: -max(f.index[0] for f in l.fields),
+            'small_first': lambda l: len(l.fields),
+            'small_last': lambda l: -len(l.fields),
+        }
+        sorted_lands = sorted(free_lands, key=sort_order[self.auction_order])
+        return sorted_lands[:self.auction_size]
 
     def url(self, player_secret=''):
         """ Return the url for the game including the versioned hostname to

@@ -231,6 +231,8 @@ class NewGameForm(wtforms.Form):
                                         choices=[
                                             ('random', 'Random'),
                                             ('go_west', 'Go West!'),
+                                            ('small_first', 'Small lands first'),
+                                            ('small_last', 'Small lands last'),
                                         ],
                                         default='random')
     public = wtforms.BooleanField('Show game in public games list')
