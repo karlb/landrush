@@ -296,11 +296,17 @@ class Player(object):
         self.notify = 'turn'
 
     def to_json(self):
-        return dict(
+        data = dict(
             (key, getattr(self, key))
             for key in 'name money bids connected_lands ai missed_deadlines '
                 'messages email notify id player_number'.split(' ')
         )
+        data['me'] = getattr(self, 'me', False)
+        if not data['me']:
+            # make bids secret
+            if data['bids']:
+                data['bids'] = 'placed'
+        return data
 
     def islands(self):
         """Islands are a set of connected lands"""
