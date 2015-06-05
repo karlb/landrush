@@ -138,7 +138,8 @@ class ShowGame(GamePage):
 
         # redirect to player page if cookie is present
         cookie_secret = self.request.cookies.get('game-%s' % game_id)
-        if not player and cookie_secret in [p.secret for p in game.players]:
+        all_secrets = [p.secret for p in game.players]
+        if not player and cookie_secret and int(cookie_secret) in all_secrets:
             return self.redirect(game.url(player_secret=cookie_secret))
 
         self.check_for_changes(game, player)
@@ -213,6 +214,11 @@ class NewGameForm(wtforms.Form):
     players = wtforms.SelectField('Number of Players',
                                   choices=zip(range(2, 11), range(2, 11)),
                                   default=4, coerce=int)
+    start_money = wtforms.SelectField('Starting Money for each Player',
+                                   choices=[(x, str(x)) for x in [
+                                       200, 350, 500, 700, 1000, 1500
+                                   ]],
+                                   default=700, coerce=int)
     max_time = wtforms.SelectField('Maximum Time per Turn',
                                    choices=[
                                        (0.0166666667, '1 minute'),
