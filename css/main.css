@@ -46,6 +46,7 @@ td.highlight {
 .in_next_auction {
   color: gray;
 }
+
 .free-land-1 {
   background-color: #FFFFFF;
 }
@@ -61,6 +62,7 @@ td.highlight {
 .free-land-5 {
   background-color: #BBBBBB;
 }
+
 .background-p1 {
   background-color: #f15854;
 }
@@ -86,5 +88,8 @@ td.highlight {
   background-color: #decf3f;
 }
 .background-p9 {
-  background-color: #4d4d4d;
+  background-color: #5f5f5f;
+}
+.background-p10 {
+  background-color: #b18080;
 }
