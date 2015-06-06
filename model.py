@@ -34,7 +34,7 @@ class Game(ndb.Model):
 
     @classmethod
     def new_game(cls, name, start_money=1000,
-                 auction_type='1st_price', players=2,
+                 auction_type='1st_price', players=4,
                  max_time=24, public=False, auction_order='random'):
         auction_size = 3 + (players - 2) // 3
         x_size = 9

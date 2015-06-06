@@ -263,6 +263,23 @@ class NewGame(BaseHandler):
         self.redirect(game.url())
 
 
+class QuickAIGame(BaseHandler):
+
+    def get(self):
+        game = Game.new_game('Test Game')
+        game.put()
+        player = Player('You', game)
+        player.email, player.notify = '', 'turn'
+        game.players.append(player)
+        game.start()
+        game.put()
+        self.session.add_flash(
+            'This game has been set up for you to try Land Rush '
+            'against AI players. The real fun will be playing against humans.',
+            'success')
+        self.redirect(game.url(player.secret))
+
+
 class ResolveAuction(BaseHandler):
 
     def get(self, game_id):
@@ -321,6 +338,7 @@ application = webapp2.WSGIApplication([
     (r'/', IndexPage, 'index'),
     (r'/game/test', GamePage),
     (r'/new_game', NewGame, 'new_game'),
+    (r'/quick_ai_game', QuickAIGame, 'quick_ai_game'),
     (r'/list_games', ListGames, 'list_games'),
     webapp2.Route(r'/game/<:\d+>/<:\d*>', ShowGame, 'game'),
     (r'/game/(\d+)/(\d+)/start', StartGame),
