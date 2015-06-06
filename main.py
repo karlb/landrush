@@ -34,6 +34,7 @@ class BaseHandler(webapp2.RequestHandler):
             'handler': self,
             'uri_for': lambda name, *args, **kwargs: \
                 webapp2.uri_for(name, self.request, *args, **kwargs),
+            'index_url': 'http://' + os.environ['DEFAULT_VERSION_HOSTNAME'],
         }
         webapp2.RequestHandler.__init__(self, *args, **kwargs)
 
@@ -335,7 +336,7 @@ class ListGames(BaseHandler):
 
 
 application = webapp2.WSGIApplication([
-    (r'/', IndexPage, 'index'),
+    webapp2.Route(r'/', IndexPage, 'index'),
     (r'/game/test', GamePage),
     (r'/new_game', NewGame, 'new_game'),
     (r'/quick_ai_game', QuickAIGame, 'quick_ai_game'),

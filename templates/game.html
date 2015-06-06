@@ -209,6 +209,7 @@
 					{% elif game.status == 'new' %}
 					<div class="panel-footer">
 						Waiting for {{ game.number_of_players - (game.players | length) }} more players to join.
+						<a href="mailto:?subject=Join my Land Rush game!&body=I'm playing a game of Land Rush and you can join me at%0D{{ game.url() }}%0D%0DLand Rush is a simple auction based game. If you'd like to find out more about it, go to%0D{{ index_url }}">Invite players</a>.
 					</div>
 					{% elif game.next_auction_time %}
 					<div class="panel-footer">
