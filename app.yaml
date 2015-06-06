@@ -11,6 +11,9 @@ handlers:
   static_dir: img
 - url: /js
   static_dir: js
+- url: /_ah/queue/deferred
+  script: google.appengine.ext.deferred.deferred.application
+  login: admin
 - url: /.*
   script: main.application
 
@@ -21,3 +24,6 @@ libraries:
   version: latest
 - name: numpy
   version: "1.6.1"
+
+builtins:
+- deferred: on
