@@ -133,6 +133,7 @@ class Game(ndb.Model):
             return 0
         return (self.remaining_turns - 1) * self.new_money + self.final_payout
 
+    @ndb.transactional
     def resolve_auction(self):
         # place bids for ai and missing players
         for p in self.players:
