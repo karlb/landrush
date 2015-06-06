@@ -51,8 +51,8 @@
 
 			// Focus first auction if visible
 			// Used instead of the autofocus attribute to avoid scrolling down on small devices
-			var screen_height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-			if ($('#first-auction').offset().top + $('#first-auction').height() + 10 < screen_height) {
+			var screen_width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+			if (screen_width >= 800) {
 				$('#first-auction').focus();
 			}
 		});
