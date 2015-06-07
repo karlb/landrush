@@ -19,7 +19,7 @@ class Field():
         self.neighbors = []
 
     def __repr__(self):
-        return repr(self.index)
+        return '%d/%d' % self.index
 
     def to_json(self):
         return dict(
