@@ -134,6 +134,7 @@ class ShowGame(GamePage):
         if game_changed:
             game.put()
 
+    @ndb.transactional
     def get(self, game_id, player_id=None):
         game, player = get_game(game_id, player_id)
 
@@ -151,6 +152,7 @@ class ShowGame(GamePage):
 
         self.show_game(game, player)
 
+    @ndb.transactional
     def post(self, game_id, player_id):
         """ Place bids """
         game, player = get_game(game_id, player_id)
@@ -158,8 +160,8 @@ class ShowGame(GamePage):
                        for b in self.request.POST.getall('bid')]
         if game.ready_for_auction:
             game.resolve_auction()
-        send_updates(game, player)
         game.put()
+        send_updates(game, player)
         self.redirect("/game/%d/%s" % (game.key.id(), player.secret))
 
 
@@ -175,6 +177,7 @@ def dumper(obj):
 
 class JSONGame(ShowGame):
 
+    @ndb.transactional
     def get(self, game_id, player_id=None):
         game, player = get_game(game_id, player_id)
         self.check_for_changes(game, player)
@@ -186,6 +189,7 @@ class JSONGame(ShowGame):
 
 class NewPlayer(BaseHandler):
 
+    @ndb.transactional
     def post(self, game_id):
         game = ndb.Key(Game, int(game_id)).get()
         assert game
@@ -283,6 +287,7 @@ class QuickAIGame(BaseHandler):
 
 class ResolveAuction(BaseHandler):
 
+    @ndb.transactional
     def get(self, game_id):
         game, _ = get_game(game_id, None)
         game.resolve_auction()
@@ -292,6 +297,7 @@ class ResolveAuction(BaseHandler):
 
 class StartGame(BaseHandler):
 
+    @ndb.transactional
     def post(self, game_id, player_secret):
         game, _ = get_game(game_id, None)
         assert int(player_secret) == game.players[0].secret
@@ -302,6 +308,7 @@ class StartGame(BaseHandler):
 
 class Notifications(BaseHandler):
 
+    @ndb.transactional
     def post(self, game_id, player_secret):
         game, player = get_game(game_id, player_secret)
 
