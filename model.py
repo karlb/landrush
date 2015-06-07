@@ -133,7 +133,7 @@ class Game(ndb.Model):
             return 0
         return (self.remaining_turns - 1) * self.new_money + self.final_payout
 
-    @ndb.transactional
+    #@ndb.transactional
     def resolve_auction(self):
         # place bids for ai and missing players
         for p in self.players:
@@ -335,4 +335,7 @@ class Player(object):
 
     @property
     def game(self):
+        # fix copying keys from production to dev
+        # see http://stackoverflow.com/questions/25923204/badrequesterror-app-devmyapp-cannot-access-app-smyapps-data
+        self.game_key = ndb.Key(pairs=self.game_key.pairs())
         return self.game_key.get()

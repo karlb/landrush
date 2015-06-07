@@ -33,4 +33,5 @@ the Land Rush auctioneer
 ''' % (p.name, game.url(p.secret))
             mails.append((p, subject, body))
 
-    deferred.defer(send_mails, mails, _transactional=True)
+    #deferred.defer(send_mails, mails, _transactional=True)
+    deferred.defer(send_mails, mails)
