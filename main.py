@@ -189,6 +189,8 @@ class JSONGame(ShowGame):
         game, player = get_game(game_id, player_id)
         self.check_for_changes(game, player)
         self.response.headers['Content-Type'] = 'application/json'
+        for p in game.players:
+            p.me = False
         player.me = True
         data = json.dumps(game, default=dumper, sort_keys=True, indent=4)
         self.response.write(data)

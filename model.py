@@ -68,6 +68,9 @@ class Game(ndb.Model):
         return self
 
     def to_json(self):
+        me = [p for p in self.players if p.me]
+        me = me[0] if me else None
+        other_players = [p for p in self.players if not p.me]
         return dict(
             name=self.name,
             pulic=self.public,
@@ -76,7 +79,8 @@ class Game(ndb.Model):
             auction_size=self.auction_size,
             start_money=self.start_money,
             final_payout=self.final_payout,
-            players=self.players,
+            me=me,
+            other_players=other_players,
             board=self.board,
             auctions=dict(
                 current=self.auction,
@@ -301,13 +305,12 @@ class Player(object):
         data = dict(
             (key, getattr(self, key))
             for key in 'name money bids connected_lands ai missed_deadlines '
-                'messages email notify id player_number'.split(' ')
+                'messages email notify id player_number me'.split(' ')
         )
-        data['me'] = getattr(self, 'me', False)
+        data['bids_placed'] = bool(data['bids'])
         if not data['me']:
             # make bids secret
-            if data['bids']:
-                data['bids'] = 'placed'
+            del data['bids']
         return data
 
     def islands(self):
