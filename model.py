@@ -33,7 +33,7 @@ class Game(ndb.Model):
     auction_order = ndb.StringProperty(default='random')
 
     @classmethod
-    def new_game(cls, name, start_money=1000,
+    def new_game(cls, name, start_money=500,
                  auction_type='1st_price', players=4,
                  max_time=24, public=False, auction_order='random'):
         auction_size = 3 + (players - 2) // 3

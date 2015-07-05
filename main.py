@@ -232,7 +232,7 @@ class NewGameForm(wtforms.Form):
                                    choices=[(x, str(x)) for x in [
                                        200, 350, 500, 700, 1000, 1500
                                    ]],
-                                   default=700, coerce=int)
+                                   default=500, coerce=int)
     max_time = wtforms.SelectField('Maximum Time per Turn',
                                    choices=[
                                        (0.0166666667, '1 minute'),
