@@ -89,6 +89,7 @@ class Game(ndb.Model):
             ),
             status=self.status,
             turn=self.turn,
+            game_id=self.key.id(),
         )
 
     @property
@@ -305,12 +306,13 @@ class Player(object):
         data = dict(
             (key, getattr(self, key))
             for key in 'name money bids connected_lands ai missed_deadlines '
-                'messages email notify id player_number me'.split(' ')
+                'messages email notify id player_number me secret'.split(' ')
         )
         data['bids_placed'] = bool(data['bids'])
         if not data['me']:
             # make bids secret
             del data['bids']
+            del data['secret']
         return data
 
     def islands(self):
