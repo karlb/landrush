@@ -155,9 +155,16 @@ class ShowGame(GamePage):
     @ndb.transactional
     def post(self, game_id, player_id):
         """ Place bids """
+        if self.request.content_type == 'application/json':
+            # JSON post
+            bids = json.loads(self.request.body)['bids']
+        else:
+            # form post
+            bids = self.request.POST.getall('bid')
+
         game, player = get_game(game_id, player_id)
         player.bids = [float(b) if b != '' else 0
-                       for b in self.request.POST.getall('bid')]
+                       for b in bids]
         if game.ready_for_auction:
             game.resolve_auction()
         game.put()
