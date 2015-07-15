@@ -40,7 +40,7 @@ def calc_bid_for_land(game, player, land):
         for n in land.neighbors
     )
     spending_factor = player.money / game.start_money
-    return base_price * (base_factor + neighbors_factor) * spending_factor
+    return round(base_price * (base_factor + neighbors_factor) * spending_factor)
 
 
 def calculate_bids(game, player):
