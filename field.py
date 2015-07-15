@@ -78,6 +78,8 @@ class Land():
         )
         if self.owner:
             d['owner'] = self.owner.id
+        if hasattr(self, 'price'):
+            d['price'] = self.price
         return d
 
     def add_field(self, field):
