@@ -4,6 +4,7 @@ import webapp2
 import json
 import sys
 from datetime import datetime, timedelta
+from random import randint
 sys.path.insert(0, 'libs')
 
 from google.appengine.ext import ndb
@@ -355,18 +356,30 @@ class ListGames(BaseHandler):
     template = 'list_games.html'
 
     def get(self):
-        self.template_vars['open_games'] = Game.query(Game.public == True, Game.status == 'new')
+        open_games = list(
+            Game.query(Game.public == True, Game.status == 'new')
+        )
+        if not open_games:
+            name = 'Newbies %d' % randint(1000, 9999)
+            game = Game.new_game(name, public=True)
+            game.put()
+            open_games = [game]
+
+        self.template_vars['open_games'] = open_games
         self.template_vars['games_in_progress'] = Game.query(Game.public == True, Game.status == 'in_progress')
         self.template_vars['finished_games'] = Game.query(Game.public == True, Game.status == 'finished')
         BaseHandler.get(self)
 
 
 application = webapp2.WSGIApplication([
+    # public
     webapp2.Route(r'/', IndexPage, 'index'),
     (r'/game/test', GamePage),
     (r'/new_game', NewGame, 'new_game'),
     (r'/quick_ai_game', QuickAIGame, 'quick_ai_game'),
     (r'/list_games', ListGames, 'list_games'),
+
+    # running game
     webapp2.Route(r'/game/<:\d+>/<:\d*>', ShowGame, 'game'),
     (r'/game/(\d+)/(\d+)/start', StartGame),
     (r'/game/(\d+)/(\d+)/notifications', Notifications),
