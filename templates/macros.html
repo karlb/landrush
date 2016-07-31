@@ -1,4 +1,4 @@
-{% macro render_field(field, label_visible=true) -%}
+{% macro render_field(field, label_visible=true, help=None) -%}
      <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
         {% if field.type != 'HiddenField' and field.widget.input_type != 'hidden' and label_visible %}
             <label for="{{ field.id }}" class="col-sm-4  control-label">{{ field.label }}</label>
@@ -11,6 +11,11 @@
                 {% endfor %}
             {% endif %}
         </div>
+		{% if help %}
+		<div class="col-sm-6">
+			<p class="help-block">{{ help }}</p>
+		</div>
+		{% endif %}
     </div>
 {%- endmacro %}
 
@@ -22,11 +27,11 @@
         {% else %}
             {% for f in form %}
                 {% if f.type == 'BooleanField' %}
-                    {{ render_field(f, **(f.description or {})) }}
+                    {{ render_field(f, help=f.description) }}
                 {% elif f.type == 'RadioField' %}
                     {{ render_radio_field(f) }}
                 {% else %}
-                    {{ render_field(f, **(f.description or {})) }}
+                    {{ render_field(f, help=f.description) }}
                 {% endif %}
             {% endfor %}
         {% endif %}
