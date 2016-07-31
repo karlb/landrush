@@ -226,37 +226,47 @@ class NewGameForm(wtforms.Form):
 
     name = wtforms.StringField('Game name')
     players = wtforms.SelectField('Number of Players',
-                                  choices=zip(range(2, 11), range(2, 11)),
-                                  default=4, coerce=int)
+            choices=zip(range(2, 11), range(2, 11)),
+            default=4, coerce=int,
+            description='If you start the game with fewer players, AI players '
+                        'will take the remaining seats.')
     start_money = wtforms.SelectField('Starting Money for each Player',
-                                   choices=[(x, str(x)) for x in [
-                                       200, 350, 500, 700, 1000, 1500
-                                   ]],
-                                   default=500, coerce=int)
+            choices=[(x, str(x)) for x in [
+                200, 350, 500, 700, 1000, 1500
+            ]],
+            default=500, coerce=int,
+            description='Each new turn will distribute 100 among the players.')
     max_time = wtforms.SelectField('Maximum Time per Turn',
-                                   choices=[
-                                       (0.0166666667, '1 minute'),
-                                       (0.0833333333, '5 minutes'),
-                                       (0.25, '15 minutes'),
-                                       (1, '1 hour'),
-                                       (3, '3 hours'),
-                                       (6, '6 hours'),
-                                       (12, '12 hours'),
-                                       (24, '24 hours'),
-                                       (2 * 24, '2 days'),
-                                       (4 * 24, '4 days'),
-                                       (7 * 24, '1 week'),
-                                   ],
-                                   default=24, coerce=float)
-    auction_order = wtforms.SelectField('Field Auction Order',
-                                        choices=[
-                                            ('random', 'Random'),
-                                            ('go_west', 'Go West!'),
-                                            ('small_first', 'Small lands first'),
-                                            ('small_last', 'Small lands last'),
-                                        ],
-                                        default='random')
-    public = wtforms.BooleanField('Show game in public games list')
+            choices=[
+                (0.0166666667, '1 minute'),
+                (0.0833333333, '5 minutes'),
+                (0.25, '15 minutes'),
+                (1, '1 hour'),
+                (3, '3 hours'),
+                (6, '6 hours'),
+                (12, '12 hours'),
+                (24, '24 hours'),
+                (2 * 24, '2 days'),
+                (4 * 24, '4 days'),
+                (7 * 24, '1 week'),
+            ],
+            default=24, coerce=float,
+            description='Usually, the next turn begins when all players have '
+                        'submitted their bids. If this time limit is reached '
+                        'an AI will take the player''s turn.')
+    auction_order = wtforms.SelectField('Land Auction Order',
+            choices=[
+                ('random', 'Random'),
+                ('go_west', 'Go West!'),
+                ('small_first', 'Small lands first'),
+                ('small_last', 'Small lands last'),
+            ],
+            default='random',
+            description='Which lands are auctioned first? "Random" is '
+                        'recommended for new players.')
+    public = wtforms.BooleanField('Show game in public games list',
+            description='Other players will be able to see your game and '
+                        'join, without receiving an invitation.')
 
 
 class NewGame(BaseHandler):
