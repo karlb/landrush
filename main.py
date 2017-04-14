@@ -28,6 +28,14 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 JINJA_ENVIRONMENT.filters.update(jinja_filters)
 
 
+auction_order_labels = {
+    'random': 'Random',
+    'go_west': 'Go West!',
+    'small_first': 'Small lands first',
+    'small_last': 'Small lands last',
+}
+
+
 class BaseHandler(webapp2.RequestHandler):
 
     template_vars = {}
@@ -82,7 +90,8 @@ class GamePage(BaseHandler):
         if game.status == 'finished':
             game.players.sort(key=lambda p: -p.money)
         self.template_vars.update(dict(players=game.players,
-                                       player=player, game=game))
+                                       player=player, game=game,
+                                       auction_order_labels=auction_order_labels))
         self.template_vars.update(game.state)
         self.template_vars['len'] = len
         if player:
@@ -258,12 +267,7 @@ class NewGameForm(wtforms.Form):
                         'submitted their bids. If this time limit is reached '
                         'an AI will take the player''s turn.')
     auction_order = wtforms.SelectField('Land Auction Order',
-            choices=[
-                ('random', 'Random'),
-                ('go_west', 'Go West!'),
-                ('small_first', 'Small lands first'),
-                ('small_last', 'Small lands last'),
-            ],
+            choices=auction_order_labels.items(),
             default='random',
             description='Which lands are auctioned first? "Random" is '
                         'recommended for new players.')
