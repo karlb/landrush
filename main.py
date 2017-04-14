@@ -30,13 +30,15 @@ JINJA_ENVIRONMENT.filters.update(jinja_filters)
 
 class BaseHandler(webapp2.RequestHandler):
 
+    template_vars = {}
+
     def __init__(self, *args, **kwargs):
-        self.template_vars = {
+        self.template_vars.update({
             'handler': self,
             'uri_for': lambda name, *args, **kwargs: \
                 webapp2.uri_for(name, self.request, *args, **kwargs),
             'index_url': 'http://' + os.environ['DEFAULT_VERSION_HOSTNAME'],
-        }
+        })
         webapp2.RequestHandler.__init__(self, *args, **kwargs)
 
     def get(self):
@@ -371,6 +373,16 @@ class ListGames(BaseHandler):
         BaseHandler.get(self)
 
 
+class RulesPage(BaseHandler):
+
+    template = 'rules.html'
+    template_vars = {
+        'content': jinja2.Markup(
+            open(os.path.dirname(__file__) + '/templates/markdown/rules.html').read()
+        )
+    }
+
+
 application = webapp2.WSGIApplication([
     # public
     webapp2.Route(r'/', IndexPage, 'index'),
@@ -378,6 +390,7 @@ application = webapp2.WSGIApplication([
     (r'/new_game', NewGame, 'new_game'),
     (r'/quick_ai_game', QuickAIGame, 'quick_ai_game'),
     (r'/list_games', ListGames, 'list_games'),
+    (r'/rules', RulesPage, 'rules'),
 
     # running game
     webapp2.Route(r'/game/<:\d+>/<:\d*>', ShowGame, 'game'),
