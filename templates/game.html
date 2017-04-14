@@ -169,7 +169,7 @@
 							Each turn, {{ game.new_money }} will be distributed among the players. The player with the highest number of connected regions gets {{ game.payouts[0] }}, the next players get {{ game.payouts[1:] | join(', ') }}. When all regions are sold, a final payout of {{ game.final_payout }} will be distributed. <a href="/rules">More&hellip;</a>
 							</p>
 							<p>
-							Auction order: {{ game.auction_order }}
+							Auction order: {{ auction_order_labels[game.auction_order] }}
 							</p>
 						</div>
 					</div>
