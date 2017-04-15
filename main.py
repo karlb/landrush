@@ -225,7 +225,8 @@ class NewPlayer(BaseHandler):
         game.put()
         self.session.add_flash('Joined successfully! Please bookmark this URL '
                                'if you want to continue playing on a '
-                               'different device.', 'success')
+                               'different device. You can now place your bids '
+                               'for the first round of auctions.', 'success')
         self.redirect("/game/%d/%s" % (game.key.id(), player.secret))
 
 
