@@ -5,6 +5,7 @@ import json
 import sys
 from datetime import datetime, timedelta
 from random import randint
+from collections import OrderedDict
 sys.path.insert(0, 'libs')
 
 from google.appengine.ext import ndb
@@ -28,12 +29,15 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 JINJA_ENVIRONMENT.filters.update(jinja_filters)
 
 
-auction_order_labels = {
-    'random': 'Random',
-    'go_west': 'Go West!',
-    'small_first': 'Small lands first',
-    'small_last': 'Small lands last',
-}
+auction_order_labels = OrderedDict([
+    ('random', 'Random'),
+    ('go_west', 'Go West!'),
+    ('small_first', 'Small lands first'),
+    ('small_last', 'Largest lands first'),
+    ('connected', 'Fields adjacent to fields lands first'),
+    ('edge_first', 'From edge to center'),
+    ('edge_last', 'From center to edge'),
+])
 
 
 class BaseHandler(webapp2.RequestHandler):
