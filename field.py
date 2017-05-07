@@ -93,6 +93,29 @@ class Land():
             self.add_field(field)
         self.board.lands.remove(land)
 
+    @property
+    def distance_to_edge(self):
+        """ Minimum distance to the edge of the map """
+        dim_dist = []
+        for dim in [0, 1]:
+            min_idx = min(f.index[dim] for f in self.fields)
+            max_idx = max(f.index[dim] for f in self.fields)
+            dim_dist.append(
+                min(min_idx, self.board.size[dim] - max_idx - 1)
+            )
+        return min(dim_dist)
+
+    @property
+    def distance_to_center(self):
+        """ Minimum distance to the center of the map """
+        return min(
+                sum(
+                    abs(f.index[dim] - self.board.size[dim] / 2.0 + 0.5)
+                    for dim in [0, 1]
+                )
+                for f in self.fields
+            )
+
 
 class Board():
 

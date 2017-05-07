@@ -221,6 +221,12 @@ class Game(ndb.Model):
             'go_west': lambda l: -max(f.index[0] for f in l.fields),
             'small_first': lambda l: len(l.fields),
             'small_last': lambda l: -len(l.fields),
+            'connected': lambda l: len([
+                    n for n in l.neighbors
+                    if n.owner is not None or n in self.auction
+                ]) == 0,
+            'edge_first': lambda l: l.distance_to_edge,
+            'edge_last': lambda l: l.distance_to_center,
         }
         sorted_lands = sorted(free_lands, key=sort_order[self.auction_order])
         return sorted_lands[:self.auction_size]
