@@ -185,6 +185,7 @@ class ShowGame(GamePage):
             game.resolve_auction()
         game.put()
         send_updates(game, player)
+        self.session.add_flash('Bids placed succesfully!', 'success')
         self.redirect("/game/%d/%s" % (game.key.id(), player.secret))
 
 
