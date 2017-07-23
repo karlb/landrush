@@ -31,6 +31,8 @@ class Game(ndb.Model):
     name = ndb.StringProperty()
     version = ndb.StringProperty(default='1')
     auction_order = ndb.StringProperty(default='random')
+    created_at = ndb.DateTimeProperty(default=datetime(2000, 1, 1))
+    finished_at = ndb.DateTimeProperty()
 
     @classmethod
     def new_game(cls, name, start_money=500,
@@ -61,7 +63,8 @@ class Game(ndb.Model):
             public=public,
             name=name,
             auction_order=auction_order,
-            version=os.environ['CURRENT_VERSION_ID'].split('.')[0]
+            version=os.environ['CURRENT_VERSION_ID'].split('.')[0],
+            created_at=datetime.utcnow(),
         )
         self.state['auction'] = self.make_auction()
         self.state['upcoming_auction'] = self.make_auction()
@@ -255,6 +258,7 @@ class Game(ndb.Model):
         if not self.auction:
             self.status = 'finished'
             total_payout = self.final_payout
+            self.finished_at = datetime.utcnow()
         scaling = total_payout / sum(payouts)
         return [int(round(pay * scaling)) for pay in payouts]
 
