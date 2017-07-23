@@ -368,7 +368,11 @@ class ListGames(BaseHandler):
 
     def get(self):
         open_games = list(
-            Game.query(Game.public == True, Game.status == 'new')
+            Game.query(
+                    Game.public == True,
+                    Game.status == 'new',
+                    Game.created_at >= datetime.utcnow() - timedelta(days=30),
+                )
         )
         if not open_games:
             name = 'Newbies %d' % randint(1000, 9999)
@@ -377,8 +381,14 @@ class ListGames(BaseHandler):
             open_games = [game]
 
         self.template_vars['open_games'] = open_games
-        self.template_vars['games_in_progress'] = Game.query(Game.public == True, Game.status == 'in_progress')
-        self.template_vars['finished_games'] = Game.query(Game.public == True, Game.status == 'finished')
+        self.template_vars['games_in_progress'] = Game.query(
+                Game.public == True,
+                Game.status == 'in_progress',
+        )
+        self.template_vars['finished_games'] = Game.query(
+                Game.public == True,
+                Game.status == 'finished',
+        ).fetch(10)
         BaseHandler.get(self)
 
 
