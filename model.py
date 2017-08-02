@@ -269,7 +269,7 @@ class Game(ndb.Model):
         for payout, player in zip(self.payouts, self.players):
             player.payout = payout
             player.money += player.payout
-            if player.money == 0:
+            if player.money <= 0:
                 player.quit = True
 
     def start(self):
