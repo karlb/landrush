@@ -305,7 +305,7 @@ class QuickAIGame(BaseHandler):
     def get(self):
         game = Game.new_game('Test Game')
         game.put()
-        player = Player('You', game)
+        player = Player('Human', game)
         player.email, player.notify = '', 'turn'
         game.players.append(player)
         game.start()
