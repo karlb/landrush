@@ -6,7 +6,6 @@
 
 {% block head %}
 	<script src="/js/moment.min.js"></script>
-	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
 	<script>
 		var turn = {{ game.turn }};
 
@@ -16,26 +15,6 @@
 			auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
 
 			$('td[data-land]').click(function() { $('input[data-land=' + this.dataset.land + ']').focus(); });
-
-			var channel_token = '{{ channel_token }}';
-			if (channel_token) {
-				channel = new goog.appengine.Channel(channel_token);
-				socket = channel.open();
-				//socket.onopen = onOpened;
-				socket.onmessage = function (message) {
-					message = $.parseJSON(message.data);
-					console.log(message);
-					if (message.turn > turn) {
-						document.location.reload(true);
-					} else {
-						$.each(message.finished_players, function(i, player_id) {
-							$('[data-player_id=' + player_id + '] .finished').html('✓');
-						});
-					}
-				};
-				//socket.onerror = onError;
-				//socket.onclose = onClose;
-			}
 
 			{% if game.next_auction_time %}
 				function update_auction_end() {

@@ -9,7 +9,6 @@ from collections import OrderedDict
 sys.path.insert(0, 'libs')
 
 from google.appengine.ext import ndb
-from google.appengine.api import channel
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
 from webapp2_extras import sessions
 import wtforms
@@ -100,11 +99,6 @@ class GamePage(BaseHandler):
         self.template_vars['len'] = len
         if player:
             client_id = '%d/%d' % (game.key.id(), player.id)
-            try:
-                self.template_vars['channel_token'] \
-                        = channel.create_channel(client_id)
-            except OverQuotaError:
-                pass
         BaseHandler.get(self)
 
 
@@ -127,7 +121,6 @@ def send_updates(game, player):
             turn=game.turn,
             finished_players=[p.id for p in game.players if p.bids]
         )
-        channel.send_message(client_id, json.dumps(message))
 
 
 class ShowGame(GamePage):
