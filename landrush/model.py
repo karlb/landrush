@@ -59,7 +59,7 @@ class Game:
         new_money = 25 * players
         final_payout = new_money * 5
         self = cls(
-            game_id = None,  # type: ignore
+            game_id = g.next_game_id,
             state=dict(
                 board=board,
                 auction=[],
@@ -82,6 +82,7 @@ class Game:
         )
         self.state['auction'] = self.make_auction()
         self.state['upcoming_auction'] = self.make_auction()
+        g.next_game_id += 1
         return self
 
     @property
@@ -259,9 +260,6 @@ class Game:
             self.players.append(player)
 
     def as_db_dict(self):
-        if self.game_id is None:
-            self.game_id = g.next_game_id
-            g.next_game_id += 1
         d = asdict(self)
         d['state'] = pickle.dumps(self.state)
         for key in ['created_at', 'finished_at', 'next_auction_time']:

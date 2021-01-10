@@ -107,6 +107,7 @@ class NewGameForm(wtforms.Form):
 
 def get_game(game_id, player_secret):
     game = queries.get_game(g.db, game_id)
+    assert game
 
     # Recognize player from URL secret
     if player_secret:
@@ -160,7 +161,7 @@ def show_game(game_id, player_secret=None):
     cookie_secret = request.cookies.get('game-%s' % game_id)
     all_secrets = [p.secret for p in game.players]
     if not player and cookie_secret and int(cookie_secret) in all_secrets:
-        return redirect(url_for('game', game_id=game.game_id, player_secret=cookie_secret))
+        return redirect(url_for('show_game', game_id=game.game_id, player_secret=cookie_secret))
 
     game_changed = False
 
