@@ -1,10 +1,9 @@
-import os
 import logging
 from email.utils import parseaddr
 from email.message import EmailMessage
 import smtplib
 
-from flask import current_app as app
+from flask import current_app as app, request
 
 
 sender_domain = 'landrush.karl.berlin'
@@ -25,18 +24,17 @@ def send_mails(mails):
         msg.set_content(body)
         messages.append(msg)
 
-    s = smtplib.SMTP('localhost')
-    try:
-        s.login(
-            os.environ['SMTP_USER'],
-            os.environ['SMTP_PASSWORD'],
-        )
-    except KeyError:
-        app.logger.warning('No SMTP credentials: not sending emails')
+    with smtplib.SMTP("smtp.sendgrid.net", port=587) as smtp:
+        try:
+            smtp.login(
+                request.environ['SMTP_USER'],
+                request.environ['SMTP_PASSWORD'],
+            )
+        except KeyError:
+            app.logger.warning('No SMTP credentials: not sending emails')
 
-    for msg in messages:
-        s.send_message(msg)
-    s.quit()
+        for msg in messages:
+            smtp.send_message(msg)
 
 
 def turn_finished(game):
