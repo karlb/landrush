@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "landrush"
+version = "0.1.0"
+description = "Auction based multiplayer web game"
+authors = ["Karl Bartel <mail@karl.berlin>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Flask = "^1.1.2"
+WTForms = "^2.3.3"
+numpy = "^1.19.4"
+aiosql = "^3.2.0"
+APScheduler = "^3.6.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
