@@ -32,9 +32,9 @@ def send_mails(mails):
             )
         except KeyError:
             app.logger.warning('No SMTP credentials: not sending emails')
-
-        for msg in messages:
-            smtp.send_message(msg)
+        else:
+            for msg in messages:
+                smtp.send_message(msg)
 
 
 def turn_finished(game):
