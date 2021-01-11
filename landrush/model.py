@@ -290,6 +290,7 @@ class Player(object):
         self.messages = []
         self.email = ''
         self.notify = 'turn'
+        self.game = game
 
     def to_json(self):
         data = dict(
@@ -327,8 +328,3 @@ class Player(object):
     def lands(self):
         return {l for l in self.game.board.lands
                 if l.owner and l.owner.id == self.id}
-
-    @property
-    def game(self):
-        from landrush import queries
-        return queries.get_game(g.db, self.game_id)
