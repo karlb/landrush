@@ -258,14 +258,6 @@ def start_game(game_id, player_secret=None):
     return redirect("/game/%d/%s" % (game.game_id, player_secret))
 
 
-@app.route('/game/test')
-def test_game():
-    game = Game.new_game('test')
-    queries.save_game(g.db, **game.as_db_dict())
-    g.db.commit()
-    return redirect(url_for('show_game', game_id=game.game_id))
-
-
 @app.route('/quick_ai_game')
 def quick_ai_game():
     game = Game.new_game('Test Game')
