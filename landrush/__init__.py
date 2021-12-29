@@ -126,7 +126,7 @@ def index():
 @app.route('/new_game', methods=['POST', 'GET'])
 def new_game():
     if request.method == 'POST':
-        form = NewGameForm(request.args)
+        form = NewGameForm(request.form)
         game = Game.new_game(**form.data)
         queries.save_game(g.db, **game.as_db_dict())
         g.db.commit()
