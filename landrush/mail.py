@@ -32,6 +32,9 @@ def send_mails(mails):
             )
         except KeyError:
             app.logger.warning('No SMTP credentials: not sending emails')
+            app.logger.debug('Mail would be:')
+            app.logger.debug(subject)
+            app.logger.debug(body)
         else:
             for msg in messages:
                 smtp.send_message(msg)

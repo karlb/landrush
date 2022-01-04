@@ -224,7 +224,7 @@ class Game:
         return sorted_lands[:self.auction_size]
 
     def url(self, player_secret=None):
-        return url_for('show_game', game_id=self.game_id, player_secret=player_secret)
+        return url_for('show_game', game_id=self.game_id, player_secret=player_secret, _external=True)
 
     @property
     def payouts(self):
