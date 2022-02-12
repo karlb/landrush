@@ -6,33 +6,33 @@ import smtplib
 from flask import current_app as app, request
 
 
-sender_domain = 'landrush.karl.berlin'
-sender = 'Land Rush <no-reply@%s>' % sender_domain
+sender_domain = "landrush.karl.berlin"
+sender = "Land Rush <no-reply@%s>" % sender_domain
 
 
 def send_mails(mails):
-    messages  =[]
+    messages = []
     for (player, subject, body) in mails:
-        if not '@' in parseaddr(player.email)[1]:
+        if not "@" in parseaddr(player.email)[1]:
             # email address invalid or not set
             continue
 
         msg = EmailMessage()
-        msg['Subject'] = subject
-        msg['From'] = sender
-        msg['To'] = player.email
+        msg["Subject"] = subject
+        msg["From"] = sender
+        msg["To"] = player.email
         msg.set_content(body)
         messages.append(msg)
 
     with smtplib.SMTP("smtp.sendgrid.net", port=587) as smtp:
         try:
             smtp.login(
-                request.environ['SMTP_USER'],
-                request.environ['SMTP_PASSWORD'],
+                request.environ["SMTP_USER"],
+                request.environ["SMTP_PASSWORD"],
             )
         except KeyError:
-            app.logger.warning('No SMTP credentials: not sending emails')
-            app.logger.debug('Mail would be:')
+            app.logger.warning("No SMTP credentials: not sending emails")
+            app.logger.debug("Mail would be:")
             app.logger.debug(subject)
             app.logger.debug(body)
         else:
@@ -43,9 +43,9 @@ def send_mails(mails):
 def turn_finished(game):
     mails = []
     for p in game.players:
-        if p.notify == 'turn':
+        if p.notify == "turn":
             subject = 'Turn %d completed in game "%s"' % (game.turn, game.name)
-            body = '''
+            body = """
 Hey %s,
 
 an auction has been settled. See the results and place your next bids at
@@ -53,7 +53,10 @@ an auction has been settled. See the results and place your next bids at
 
 Regards,
 the Land Rush auctioneer
-''' % (p.name, game.url(p.secret))
+""" % (
+                p.name,
+                game.url(p.secret),
+            )
             mails.append((p, subject, body))
 
     send_mails(mails)
