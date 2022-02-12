@@ -197,7 +197,7 @@ def show_game(game_id, player_secret=None):
     # Set player cookie, so that players get to their game page when using the
     # general game link
     if player:
-        resp.set_cookie('game-%s' % game_id, str(player.secret))
+        resp.set_cookie('game-%s' % game_id, str(player.secret), max_age=60 * 60 * 24 * 100)
 
     return resp
 
@@ -241,7 +241,7 @@ def save_notification_settings(game_id, player_secret):
 
     # change defaults in cookie
     defaults = '%s|%s' % (player.email, player.notify)
-    resp.set_cookie('notify-defaults', defaults)
+    resp.set_cookie('notify-defaults', defaults, max_ago=60 * 60 * 24 * 365 * 10)
 
     return resp
 
