@@ -10,7 +10,8 @@
         var turn = {{ game.turn }};
 
         $(function() {
-            auction_inputs.focus(function () {
+            var auction_inputs = $('.auction input');
+            auction_inputs.focus(function (e) {
                 $('.' + this.dataset.land).addClass('highlight');
                 e.preventDefault();
                 e.target.focus({preventScroll: true});
