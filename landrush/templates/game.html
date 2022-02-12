@@ -10,8 +10,11 @@
 		var turn = {{ game.turn }};
 
 		$(function() {
-			var auction_inputs = $('.auction-land input');
-			auction_inputs.focus(function () {$('.' + this.dataset.land).addClass('highlight')});
+			auction_inputs.focus(function () {
+				$('.' + this.dataset.land).addClass('highlight');
+				e.preventDefault();
+				e.target.focus({preventScroll: true});
+			});
 			auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
 
 			$('td[data-land]').click(function() { $('input[data-land=' + this.dataset.land + ']').focus(); });
@@ -30,10 +33,7 @@
 
 			// Focus first auction if visible
 			// Used instead of the autofocus attribute to avoid scrolling down on small devices
-			var screen_width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-			if (screen_width >= 800) {
-				$('#first-auction').focus();
-			}
+			$('#first-auction')[0].focus({preventScroll: true});
 		});
 	</script>
 {% endblock %}
