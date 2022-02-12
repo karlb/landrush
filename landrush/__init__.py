@@ -170,16 +170,19 @@ def show_game(game_id, player_secret=None):
     game, player = get_game(game_id, player_secret)
 
     if request.method == "POST":
-        bids = request.form.getlist("bid")
+        if int(request.form.get("turn")) != game.turn:
+            flash("Too late! The turn has already passed.", "danger")
+        else:
+            bids = request.form.getlist("bid")
 
-        player.bids = [float(b) if b != "" else 0 for b in bids]
-        if game.ready_for_auction:
-            game.resolve_auction()
+            player.bids = [float(b) if b != "" else 0 for b in bids]
+            if game.ready_for_auction:
+                game.resolve_auction()
 
-        queries.save_game(g.db, **game.as_db_dict())
-        g.db.commit()
+            queries.save_game(g.db, **game.as_db_dict())
+            g.db.commit()
 
-        flash("Bids placed succesfully!", "success")
+            flash("Bids placed succesfully!", "success")
         return redirect(
             url_for("show_game", game_id=game_id, player_secret=player_secret)
         )

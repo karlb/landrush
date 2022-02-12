@@ -92,6 +92,7 @@
 					<div class="panel-heading">Auction {{ game.turn + 1 }} of {{ game.turn + game.remaining_turns }}</div>
 					<div class="panel-body">
 						<form class="form-horizontal" method="POST">
+                            <input type="hidden" name="turn" value="{{ game.turn }}"/>
 							{% for land in auction %}
 							<div class="form-group auction-land">
 								<label class="col-xs-2 control-label">{{ loop.index }}</label>
