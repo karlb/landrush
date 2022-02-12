@@ -6,6 +6,7 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
 .board {
   margin-bottom: 15px;
   width: 100%;
@@ -47,49 +48,20 @@ td.highlight {
   color: gray;
 }
 
-.free-land-1 {
-  background-color: #FFFFFF;
-}
-.free-land-2 {
-  background-color: #EEEEEE;
-}
-.free-land-3 {
-  background-color: #DDDDDD;
-}
-.free-land-4 {
-  background-color: #CCCCCC;
-}
-.free-land-5 {
-  background-color: #BBBBBB;
-}
+.free-land-1 { background-color: #FFFFFF; }
+.free-land-2 { background-color: #EEEEEE; }
+.free-land-3 { background-color: #DDDDDD; }
+.free-land-4 { background-color: #CCCCCC; }
+.free-land-5 { background-color: #BBBBBB; }
 
-.background-p1 {
-  background-color: #f15854;
-}
-.background-p2 {
-  background-color: #5da5da;
-}
-.background-p3 {
-  background-color: #faa43a;
-}
-.background-p4 {
-  background-color: #60bd68;
-}
-.background-p5 {
-  background-color: #f17cb0;
-}
-.background-p6 {
-  background-color: #b2912f;
-}
-.background-p7 {
-  background-color: #b276b2;
-}
-.background-p8 {
-  background-color: #decf3f;
-}
-.background-p9 {
-  background-color: #5f5f5f;
-}
-.background-p10 {
-  background-color: #b18080;
-}
+/* color palette from http://www.mulinblog.com/a-color-palette-optimized-for-data-visualization/ */
+.background-p1  { background-color: #f15854; }
+.background-p2  { background-color: #5da5da; }
+.background-p3  { background-color: #faa43a; }
+.background-p4  { background-color: #60bd68; }
+.background-p5  { background-color: #f17cb0; }
+.background-p6  { background-color: #b2912f; }
+.background-p7  { background-color: #b276b2; }
+.background-p8  { background-color: #decf3f; }
+.background-p9  { background-color: #5f5f5f; }
+.background-p10 { background-color: #b18080; }
