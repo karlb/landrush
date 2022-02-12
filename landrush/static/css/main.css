@@ -1,10 +1,10 @@
 body {
-  padding: 15px 0;
+    padding: 15px 0;
 }
 #main-container {
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @media (min-width: 768px) {
@@ -14,49 +14,49 @@ body {
     }
 }
 .board {
-  margin-bottom: 15px;
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-family: sans-serif;
+    margin-bottom: 15px;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: sans-serif;
 }
 .board td {
-  height: 8vh;
-  border: 0 solid black;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 90%;
+    height: 8vh;
+    border: 0 solid black;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 90%;
 }
 .board .top_border {
-  border-top-width: 3px;
+    border-top-width: 3px;
 }
 .board .bottom_border {
-  border-bottom-width: 3px;
+    border-bottom-width: 3px;
 }
 .board .left_border {
-  border-left-width: 3px;
+    border-left-width: 3px;
 }
 .board .right_border {
-  border-right-width: 3px;
+    border-right-width: 3px;
 }
 td.highlight {
-  -webkit-text-stroke: 1px blue;
+    -webkit-text-stroke: 1px blue;
 }
 .sold {
-  font-size: max(1.0vh, 40%);
-  white-space: nowrap;
+    font-size: max(1.0vh, 40%);
+    white-space: nowrap;
 }
 .active_player {
-  background-color: lightgray;
+    background-color: lightgray;
 }
 .in_this_auction {
-  font-size: 4vh;
+    font-size: 4vh;
 }
 .in_last_auction {
-  font-size: 2vh;
+    font-size: 2vh;
 }
 .in_next_auction {
-  color: gray;
+    color: gray;
 }
 
 form.auction {
