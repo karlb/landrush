@@ -17,6 +17,7 @@
                 e.target.focus({preventScroll: true});
             });
             auction_inputs.blur(function () {$('.' + this.dataset.land).removeClass('highlight')});
+            auction_inputs.on('input', function () {$('#bids-saved').hide()});
 
             $('td[data-land]').click(function() { $('input[data-land=' + this.dataset.land + ']').focus(); });
 
@@ -90,7 +91,12 @@
             <div class="col-sm-4">
                 {% if player and game.status in ('new', 'in_progress') %}
                 <div class="panel panel-default">
-                    <div class="panel-heading">Auction {{ game.turn + 1 }} of {{ game.turn + game.remaining_turns }}</div>
+                    <div class="panel-heading">
+                        {% if player.bids %}
+                            <div id="bids-saved">saved ✔</div>
+                        {% endif %}
+                        Auction {{ game.turn + 1 }} of {{ game.turn + game.remaining_turns }}
+                    </div>
                     <div class="panel-body">
                         <form method="POST" class="auction">
                             <input type="hidden" name="turn" value="{{ game.turn }}"/>

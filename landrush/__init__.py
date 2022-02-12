@@ -181,8 +181,6 @@ def show_game(game_id, player_secret=None):
 
             queries.save_game(g.db, **game.as_db_dict())
             g.db.commit()
-
-            flash("Bids placed succesfully!", "success")
         return redirect(
             url_for("show_game", game_id=game_id, player_secret=player_secret)
         )
