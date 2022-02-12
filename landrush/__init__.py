@@ -230,7 +230,10 @@ def show_game(game_id, player_secret=None):
     # general game link
     if player:
         resp.set_cookie(
-            "game-%s" % game_id, str(player.secret), max_age=60 * 60 * 24 * 100
+            "game-%s" % game_id,
+            str(player.secret),
+            max_age=60 * 60 * 24 * 100,
+            samesite="Lax",
         )
 
     return resp
@@ -278,7 +281,9 @@ def save_notification_settings(game_id, player_secret):
 
     # change defaults in cookie
     defaults = "%s|%s" % (player.email, player.notify)
-    resp.set_cookie("notify-defaults", defaults, max_ago=60 * 60 * 24 * 365 * 10)
+    resp.set_cookie(
+        "notify-defaults", defaults, max_ago=60 * 60 * 24 * 365 * 10, samesite="Lax"
+    )
 
     return resp
 
