@@ -7,17 +7,25 @@ body {
   margin-right: auto;
 }
 
+@media (min-width: 768px) {
+    .board {
+        height: 80vmin;
+        max-height: 600px;
+    }
+}
 .board {
   margin-bottom: 15px;
   width: 100%;
-  height: 400px;
   border-collapse: collapse;
   table-layout: fixed;
+  font-family: sans-serif;
 }
 .board td {
+  height: 8vh;
   border: 0 solid black;
   text-align: center;
-  height: 40px;
+  vertical-align: middle;
+  line-height: 90%;
 }
 .board .top_border {
   border-top-width: 3px;
@@ -32,20 +40,35 @@ body {
   border-right-width: 3px;
 }
 td.highlight {
-  text-shadow:
-   -1px -1px 0 lightgreen,
-    1px -1px 0 lightgreen,
-   -1px  1px 0 lightgreen,
-    1px  1px 0 lightgreen;
+  -webkit-text-stroke: 1px blue;
+}
+.sold {
+  font-size: max(1.0vh, 40%);
+  white-space: nowrap;
 }
 .active_player {
   background-color: lightgray;
 }
 .in_this_auction {
-  font-size: 200%;
+  font-size: 4vh;
+}
+.in_last_auction {
+  font-size: 2vh;
 }
 .in_next_auction {
   color: gray;
+}
+
+form.auction {
+    display: flex;
+    gap: 0.5em;
+    justify-content: space-between;
+}
+form.auction input, button {
+}
+form.auction input {
+    width: 3em;
+    flex-grow: 1;
 }
 
 .free-land-1 { background-color: #FFFFFF; }
@@ -65,3 +88,14 @@ td.highlight {
 .background-p8  { background-color: #decf3f; }
 .background-p9  { background-color: #5f5f5f; }
 .background-p10 { background-color: #b18080; }
+
+/* Hide spinner in number entry field, see https://stackoverflow.com/a/4298216/114926 */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+input[type=number] {
+    -moz-appearance:textfield; /* Firefox */
+}

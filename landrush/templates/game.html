@@ -73,7 +73,7 @@
 								</td>
 							{% elif field.land in last_auction %}
 								<td class="{{ field.classes() }} in_last_auction">
-									<span style="font-size: 60%">sold for</span><br/>
+									<div class="sold">sold for</div>
 									{{ field.land.price | money }}
 								</td>
 							{% else %}
@@ -91,25 +91,15 @@
 				<div class="panel panel-default">
 					<div class="panel-heading">Auction {{ game.turn + 1 }} of {{ game.turn + game.remaining_turns }}</div>
 					<div class="panel-body">
-						<form class="form-horizontal" method="POST">
-                            <input type="hidden" name="turn" value="{{ game.turn }}"/>
+						<form method="POST" class="auction">
+							<input type="hidden" name="turn" value="{{ game.turn }}"/>
 							{% for land in auction %}
-							<div class="form-group auction-land">
-								<label class="col-xs-2 control-label">{{ loop.index }}</label>
-								<div class="col-xs-10">
-									<input type="number" data-land="{{ land.id }}"
-										{% if loop.index0 == 0 %}id="first-auction"{% endif %}
-										required min="0" max="{{player.money if player.money > 0 else 0}}"
-										class="form-control input-sm"
-										name="bid" value="{{ player.bids[loop.index0] | money }}">
-								</div>
-							</div>
+								<input type="number" data-land="{{ land.id }}"
+									{% if loop.index0 == 0 %}id="first-auction"{% endif %}
+									required min="0" max="{{player.money if player.money > 0 else 0}}"
+									name="bid" value="{{ player.bids[loop.index0] | money }}">
 							{% endfor %}
-							<div class="form-group">
-								<div class="col-xs-offset-2 col-xs-10">
-									<button type="submit" class="btn btn-primary">{{ 'Update' if player.bids else 'Place' }} Bids</button>
-								</div>
-							</div>
+							<button type="submit" class="btn btn-primary">{{ 'Update' if player.bids else 'Place' }} Bids</button>
 						</form>
 					</div>
 				</div>
