@@ -1,3 +1,4 @@
+import os
 import logging
 from email.utils import parseaddr
 from email.message import EmailMessage
@@ -27,8 +28,8 @@ def send_mails(mails):
     with smtplib.SMTP("smtp.sendgrid.net", port=587) as smtp:
         try:
             smtp.login(
-                request.environ["SMTP_USER"],
-                request.environ["SMTP_PASSWORD"],
+                os.environ["SMTP_USER"],
+                os.environ["SMTP_PASSWORD"],
             )
         except KeyError:
             app.logger.warning("No SMTP credentials: not sending emails")
