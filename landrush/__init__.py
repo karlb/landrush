@@ -280,7 +280,7 @@ def save_notification_settings(game_id, player_secret):
     # change defaults in cookie
     defaults = "%s|%s" % (player.email, player.notify)
     resp.set_cookie(
-        "notify-defaults", defaults, max_ago=60 * 60 * 24 * 365 * 10, samesite="Lax"
+        "notify-defaults", defaults, max_age=60 * 60 * 24 * 365 * 10, samesite="Lax"
     )
 
     return resp
