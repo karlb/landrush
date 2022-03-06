@@ -1,0 +1,33 @@
+server {
+	server_name landrush.karl.berlin;
+	listen [::]:443 ssl; # managed by Certbot
+	listen 443 ssl; # managed by Certbot
+
+	root /home/karl/landrush/landrush/;
+
+	location /static {
+	}
+
+	location / {
+		include uwsgi_params;
+		uwsgi_pass unix:/tmp/landrush.sock;
+	}
+
+	ssl_certificate /etc/letsencrypt/live/landrush.karl.berlin/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/landrush.karl.berlin/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+# redirect to HTTPS
+server {
+	server_name landrush.karl.berlin;
+	listen 80;
+	listen [::]:80;
+
+	if ($host = landrush.karl.berlin) {
+		return 301 https://$host$request_uri;
+	} # managed by Certbot
+
+	return 404; # managed by Certbot
+}
