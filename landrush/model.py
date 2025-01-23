@@ -7,7 +7,6 @@ from dataclasses import dataclass, asdict
 from typing import Optional
 import pickle
 
-import pkg_resources
 from flask import g, url_for
 
 import landrush.ai as ai
@@ -83,7 +82,7 @@ class Game:
             public=public,
             name=name,
             auction_order=auction_order,
-            version=pkg_resources.get_distribution("landrush").version.split(".")[0],
+            version=0,
             created_at=datetime.utcnow(),
         )
         self.state["auction"] = self.make_auction()
