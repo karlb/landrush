@@ -1,0 +1,3 @@
+NGINX_SERVER_NAME=test.karl.berlin
+NGINX_HTTPS_ONLY=1
+NGINX_STATIC_PATHS=/static:landrush/static
