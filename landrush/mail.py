@@ -7,7 +7,7 @@ import smtplib
 from flask import current_app as app, request
 
 
-sender_domain = "landrush.karl.berlin"
+sender_domain = "karl.berlin"
 sender = "Land Rush <no-reply@%s>" % sender_domain
 
 
